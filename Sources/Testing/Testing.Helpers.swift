@@ -1,0 +1,120 @@
+// ===----------------------------------------------------------------------===//
+//
+// This source file is part of the swift-testing open source project
+//
+// Copyright (c) 2024-2025 Coen ten Thije Boonkkamp and the swift-testing project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE for license information
+//
+// ===----------------------------------------------------------------------===//
+
+public import Test_Primitives
+
+// MARK: - Helpers for Macro Expansion
+
+extension Testing {
+    /// Helper for #expect macro expansion.
+    ///
+    /// Macros expand to calls to this function, which delegates to
+    /// the underlying `expect()` from swift-tests.
+    @inlinable
+    @discardableResult
+    public static func __expect(
+        _ condition: Bool,
+        _ comment: Test.Text? = nil,
+        fileID: String = #fileID,
+        filePath: String = #filePath,
+        line: Int = #line,
+        column: Int = #column
+    ) -> Test.Expectation {
+        expect(
+            condition,
+            comment,
+            fileID: fileID,
+            filePath: filePath,
+            line: line,
+            column: column
+        )
+    }
+
+    /// Helper for #require macro expansion (Bool version).
+    ///
+    /// Macros expand to calls to this function, which delegates to
+    /// the underlying `require()` from swift-tests.
+    @inlinable
+    public static func __require(
+        _ condition: Bool,
+        _ comment: Test.Text? = nil,
+        fileID: String = #fileID,
+        filePath: String = #filePath,
+        line: Int = #line,
+        column: Int = #column
+    ) throws {
+        try require(
+            condition,
+            comment,
+            fileID: fileID,
+            filePath: filePath,
+            line: line,
+            column: column
+        )
+    }
+
+    /// Helper for #require macro expansion (Optional version).
+    ///
+    /// Macros expand to calls to this function, which delegates to
+    /// the underlying `require()` from swift-tests.
+    @inlinable
+    public static func __require<T>(
+        _ optional: T?,
+        _ comment: Test.Text? = nil,
+        fileID: String = #fileID,
+        filePath: String = #filePath,
+        line: Int = #line,
+        column: Int = #column
+    ) throws -> T {
+        try require(
+            optional,
+            comment,
+            fileID: fileID,
+            filePath: filePath,
+            line: line,
+            column: column
+        )
+    }
+}
+
+// MARK: - Factory Registration Helper
+
+extension Testing {
+    /// C-compatible function type for factory functions.
+    public typealias FactoryFunction = @convention(c) () -> UnsafeRawPointer
+
+    /// Creates a boxed registration and returns it as an unsafe pointer.
+    ///
+    /// Used by @Test macro expansion to create factory functions.
+    ///
+    /// - Parameters:
+    ///   - id: Test identifier.
+    ///   - traits: Test traits.
+    ///   - body: Test body.
+    ///   - suiteID: Optional suite identifier.
+    /// - Returns: Retained pointer to boxed registration.
+    @inlinable
+    public static func __createRegistration(
+        id: Test.ID,
+        traits: [Test.Trait],
+        body: Test.Body,
+        suiteID: String? = nil
+    ) -> UnsafeRawPointer {
+        let registration = Registration(
+            id: id,
+            traits: traits,
+            body: body,
+            suiteID: suiteID
+        )
+        let boxed = Box(registration)
+        return UnsafeRawPointer(Unmanaged.passRetained(boxed).toOpaque())
+    }
+}
