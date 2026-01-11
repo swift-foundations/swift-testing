@@ -10,6 +10,7 @@
 // ===----------------------------------------------------------------------===//
 
 public import Test_Primitives
+internal import Standard_Library_Extensions
 
 extension Testing {
     /// Configuration for test execution.
@@ -55,7 +56,7 @@ extension Testing {
 
             if let tagsString = Kernel.Environment.get("SWIFT_TEST_TAGS") {
                 let tags = tagsString.split(separator: ",").map { tag in
-                    String(tag).trimmingCharacters(in: TrimCharacterSet.whitespaces)
+                    String(String(tag).trimming(where: \.isWhitespace))
                 }
                 config.tags = Set(tags)
             }
@@ -95,34 +96,3 @@ extension Testing.Configuration {
     }
 }
 
-// MARK: - CharacterSet Workaround
-
-private extension String {
-    func trimmingCharacters(in characterSet: TrimCharacterSet) -> String {
-        var start = startIndex
-        var end = endIndex
-
-        while start < end && characterSet.contains(self[start]) {
-            start = index(after: start)
-        }
-
-        while end > start {
-            let prev = index(before: end)
-            if characterSet.contains(self[prev]) {
-                end = prev
-            } else {
-                break
-            }
-        }
-
-        return String(self[start..<end])
-    }
-}
-
-private struct TrimCharacterSet {
-    static let whitespaces = TrimCharacterSet()
-
-    func contains(_ char: Character) -> Bool {
-        char == " " || char == "\t" || char == "\n" || char == "\r"
-    }
-}

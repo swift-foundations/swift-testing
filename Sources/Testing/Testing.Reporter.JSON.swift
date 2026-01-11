@@ -28,6 +28,13 @@ extension Testing {
 
 // MARK: - JSON Sink
 
+/**
+ Pending: Replace with swift-json when available.
+
+ Current implementation is intentionally minimal and does not fully
+ implement string escaping semantics.
+ */
+
 extension Testing.Reporter {
     /// A test reporter sink that outputs JSON.
     ///

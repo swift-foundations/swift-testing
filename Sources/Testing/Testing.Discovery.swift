@@ -9,16 +9,6 @@
 //
 // ===----------------------------------------------------------------------===//
 
-#if canImport(Darwin)
-import Darwin
-import MachO
-#elseif canImport(Glibc)
-import Glibc
-#elseif canImport(Musl)
-import Musl
-#endif
-
-// Fallback imports for dlsym-based discovery
 internal import Loader
 internal import Loader_Primitives
 
@@ -40,82 +30,87 @@ extension Testing {
         public static func discoverFromSections() -> Test.Plan.Registry {
             var registry = Test.Plan.Registry()
 
+            // Enumerate all test content sections
+            for bounds in Loader.Section.all(.swiftTestContent) {
+                parseTestContentSection(bounds.buffer, into: &registry)
+            }
+
+            // Also check fallback section (older Darwin binaries use __DATA instead of __DATA_CONST)
             #if canImport(Darwin)
-            discoverFromSectionsDarwin(&registry)
-            #elseif os(Linux)
-            // TODO: Implement Linux section enumeration via dl_iterate_phdr
-            #elseif os(Windows)
-            // TODO: Implement Windows section enumeration
+            for bounds in Loader.Section.all(.swiftTestContentFallback) {
+                parseTestContentSection(bounds.buffer, into: &registry)
+            }
             #endif
 
             return registry
         }
 
-        #if canImport(Darwin)
-        /// Darwin-specific section enumeration using dyld APIs.
-        private static func discoverFromSectionsDarwin(_ registry: inout Test.Plan.Registry) {
-            let imageCount = _dyld_image_count()
+        /// Parses test content records from a section buffer.
+        ///
+        /// Uses alignment-safe loading to handle potentially unaligned section data.
+        ///
+        /// - Parameters:
+        ///   - buffer: The raw section buffer containing test content records.
+        ///   - registry: The registry to add discovered tests to.
+        private static func parseTestContentSection(
+            _ buffer: UnsafeRawBufferPointer,
+            into registry: inout Test.Plan.Registry
+        ) {
+            let recordStride = MemoryLayout<__TestContentRecord>.stride
 
-            for i in 0..<imageCount {
-                guard let header = _dyld_get_image_header(i) else {
-                    continue
-                }
+            // Validate section size is a multiple of record stride
+            guard buffer.count % recordStride == 0 else {
+                // Corrupt or unknown section format - skip silently
+                return
+            }
 
-                // Cast to 64-bit header (all modern Apple platforms are 64-bit)
-                let header64 = UnsafeRawPointer(header).assumingMemoryBound(to: mach_header_64.self)
+            let recordCount = buffer.count / recordStride
 
-                var size: UInt = 0
+            for j in 0..<recordCount {
+                let offset = j * recordStride
 
-                // Try __DATA_CONST first, then __DATA (for older binaries)
-                var sectionData = getsectiondata(header64, "__DATA_CONST", "__swift5_tests", &size)
-                if sectionData == nil {
-                    sectionData = getsectiondata(header64, "__DATA", "__swift5_tests", &size)
-                }
-
-                guard let data = sectionData, size > 0 else {
-                    continue
-                }
-
-                // Enumerate records in this section
-                let recordStride = MemoryLayout<__TestContentRecord>.stride
-                let recordCount = Int(size) / recordStride
-                let basePtr = UnsafeRawPointer(data)
-
-                for j in 0..<recordCount {
-                    let recordPtr = basePtr.advanced(by: j * recordStride)
-                    let record = recordPtr.load(as: __TestContentRecord.self)
-
-                    // Check if this is a test record (kind == 'test')
-                    guard record.kind == __TestContentKind.test.rawValue else {
-                        continue
-                    }
-
-                    // Call the accessor to get the registration
-                    guard let accessor = record.accessor else {
-                        continue
-                    }
-
-                    var registrationPtr: UnsafeRawPointer? = nil
-                    let success = accessor(
-                        &registrationPtr,
-                        UnsafeRawPointer(bitPattern: 1)!,  // type placeholder
-                        UnsafeRawPointer?(nil),  // hint
-                        0     // reserved
+                // Use alignment-safe loading by copying to stack-allocated storage
+                let record: __TestContentRecord = withUnsafeTemporaryAllocation(
+                    of: __TestContentRecord.self,
+                    capacity: 1
+                ) { temp in
+                    // Copy bytes to properly aligned temporary storage
+                    UnsafeMutableRawPointer(temp.baseAddress!).copyMemory(
+                        from: buffer.baseAddress!.advanced(by: offset),
+                        byteCount: recordStride
                     )
-
-                    guard success, let ptr = registrationPtr else {
-                        continue
-                    }
-
-                    // Unbox the registration
-                    let boxed = Unmanaged<Box<Registration>>.fromOpaque(ptr).takeRetainedValue()
-                    let reg = boxed.value
-
-                    registry.add(id: reg.id, traits: reg.traits, body: reg.body)
+                    return temp[0]
                 }
+
+                // Check if this is a test record (kind == 'test')
+                guard record.kind == __TestContentKind.test.rawValue else {
+                    continue
+                }
+
+                // Call the accessor to get the registration
+                guard let accessor = record.accessor else {
+                    continue
+                }
+
+                var registrationPtr: UnsafeRawPointer? = nil
+                let success = accessor(
+                    &registrationPtr,
+                    UnsafeRawPointer(bitPattern: 1)!,  // type placeholder
+                    UnsafeRawPointer?(nil),  // hint
+                    0     // reserved
+                )
+
+                guard success, let ptr = registrationPtr else {
+                    continue
+                }
+
+                // Unbox the registration
+                let boxed = Unmanaged<Box<Registration>>.fromOpaque(ptr).takeRetainedValue()
+                let reg = boxed.value
+
+                registry.add(id: reg.id, traits: reg.traits, body: reg.body)
             }
         }
-        #endif
 
         // MARK: - Fallback: Symbol-Based Discovery
 

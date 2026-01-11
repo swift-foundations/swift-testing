@@ -22,6 +22,7 @@ let package = Package(
     dependencies: [
         // Tier 1: Primitives
         .package(path: "../../swift-primitives/swift-test-primitives"),
+        .package(path: "../../swift-primitives/swift-standard-library-extensions"),
         // Tier 2: Runner infrastructure
         .package(path: "../swift-tests"),
         // Platform abstraction (file I/O, environment variables)
@@ -53,6 +54,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Tests", package: "swift-tests"),
                 .product(name: "Test Primitives", package: "swift-test-primitives"),
+                .product(name: "Standard Library Extensions", package: "swift-standard-library-extensions"),
                 .product(name: "Kernel", package: "swift-kernel"),
                 .product(name: "Loader", package: "swift-loader"),
             ],
