@@ -21,18 +21,18 @@ let package = Package(
     ],
     dependencies: [
         // Tier 1: Primitives
-        .package(path: "../../swift-primitives/swift-test-primitives"),
-        .package(path: "../../swift-primitives/swift-standard-library-extensions"),
+        .package(url: "https://github.com/swift-primitives/swift-test-primitives.git", from: "0.0.1"),
+        .package(url: "https://github.com/swift-primitives/swift-standard-library-extensions.git", from: "0.0.1"),
         // Tier 2: Runner infrastructure
-        .package(path: "../swift-tests"),
+        .package(url: "https://github.com/swift-foundations/swift-tests.git", from: "0.0.1"),
         // Platform abstraction (file I/O, environment variables)
-        .package(path: "../swift-kernel"),
+        .package(url: "https://github.com/swift-foundations/swift-kernel.git", from: "0.0.1"),
         // Dynamic loader (symbol lookup)
-        .package(path: "../swift-loader"),
+        .package(url: "https://github.com/swift-foundations/swift-loader.git", from: "0.0.1"),
         // Macro implementation
         .package(url: "https://github.com/swiftlang/swift-syntax", "600.0.0"..<"603.0.0"),
         // Macro testing utilities
-        .package(path: "../swift-testing-extras"),
+        .package(url: "https://github.com/swift-foundations/swift-testing-extras.git", from: "0.0.1"),
     ],
     targets: [
         // UMBRELLA TARGET - what users import as "Testing"
