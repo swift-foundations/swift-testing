@@ -19,5 +19,6 @@ struct TestingMacrosPlugin: CompilerPlugin {
         SuiteMacro.self,
         ExpectMacro.self,
         RequireMacro.self,
+        ExpectSnapshotMacro.self,
     ]
 }
