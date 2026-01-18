@@ -18,28 +18,22 @@ extension Testing {
     /// Discovery reads suites first, then applies trait inheritance to tests.
     public struct SuiteRegistration: Sendable {
         /// Unique identifier for this suite.
-        public let id: String
+        public let id: Test.ID
 
         /// Suite traits (tags, timeLimit, enabled, serialized).
         public let traits: [Test.Trait]
 
-        /// Source location where the suite is declared.
-        public let sourceLocation: Test.Source.Location
-
         /// Creates a suite registration.
         ///
         /// - Parameters:
-        ///   - id: Suite identifier (typically the type name).
+        ///   - id: Suite identifier.
         ///   - traits: Suite-level traits.
-        ///   - sourceLocation: Source location of the suite declaration.
         public init(
-            id: String,
-            traits: [Test.Trait],
-            sourceLocation: Test.Source.Location
+            id: Test.ID,
+            traits: [Test.Trait]
         ) {
             self.id = id
             self.traits = traits
-            self.sourceLocation = sourceLocation
         }
     }
 }

@@ -74,7 +74,7 @@ public macro expectSnapshot<Value, Format>(
 /// This function is prefixed with `__` to indicate it should not be
 /// called directly by users.
 @discardableResult
-public func __expectSnapshot<Value, Format>(
+public func __expectSnapshot<Value: Sendable, Format: Sendable>(
     _ value: Value,
     as strategy: Test.Snapshot.Strategy<Value, Format>,
     named name: String? = nil,
@@ -84,7 +84,7 @@ public func __expectSnapshot<Value, Format>(
     column: Int = #column,
     function: String = #function
 ) -> Test.Expectation {
-    expectSnapshot(
+    assertSnapshot(
         of: value,
         as: strategy,
         named: name,
@@ -98,7 +98,7 @@ public func __expectSnapshot<Value, Format>(
 
 /// Async variant of the internal bridge function.
 @discardableResult
-public func __expectSnapshot<Value, Format>(
+public func __expectSnapshot<Value: Sendable, Format: Sendable>(
     _ value: Value,
     as strategy: Test.Snapshot.Strategy<Value, Format>,
     named name: String? = nil,
@@ -108,7 +108,7 @@ public func __expectSnapshot<Value, Format>(
     column: Int = #column,
     function: String = #function
 ) async -> Test.Expectation {
-    await expectSnapshot(
+    await assertSnapshot(
         of: value,
         as: strategy,
         named: name,

@@ -17,6 +17,7 @@ struct TestingMacrosPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         TestMacro.self,
         SuiteMacro.self,
+        TestsMacro.self,
         ExpectMacro.self,
         RequireMacro.self,
         ExpectSnapshotMacro.self,

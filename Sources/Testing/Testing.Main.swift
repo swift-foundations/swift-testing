@@ -9,9 +9,24 @@
 //
 // ===----------------------------------------------------------------------===//
 
+import Kernel
 import Synchronization
 
 extension Testing {
+    /// SwiftPM entry point for test execution.
+    ///
+    /// This function is called by SwiftPM's generated test runner when it detects
+    /// a module named "Testing". It runs all discovered tests and exits with
+    /// the appropriate status code.
+    ///
+    /// - Returns: Never returns; exits the process.
+    public static func __swiftPMEntryPoint() async -> Never {
+        let fallbackNames = Manifest.getFactoryNames()
+        let registry = Discovery.discoverAll(fallbackFactoryNames: fallbackNames)
+        let hasFailures = await runReturningResult(registry: registry)
+        POSIX.Kernel.Process.Exit.now(hasFailures ? 1 : 0)
+    }
+
     /// Main entry point for test execution.
     ///
     /// This function is **actor-agnostic** (no `@MainActor`). Tests that need
@@ -62,6 +77,11 @@ extension Testing {
 
     /// Internal runner that executes a test plan from a registry.
     private static func run(registry: consuming Test.Plan.Registry) async {
+        _ = await runReturningResult(registry: registry)
+    }
+
+    /// Internal runner that executes a test plan and returns whether there were failures.
+    private static func runReturningResult(registry: consuming Test.Plan.Registry) async -> Bool {
         let config = Configuration.fromEnvironment()
 
         // Apply filters
@@ -83,10 +103,7 @@ extension Testing {
         let runner = Test.Runner(reporter: reporter)
         let result = await runner.run(plan, concurrency: config.concurrency)
 
-        if result.hasFailures {
-            // Exit with non-zero status on failure
-            // TODO: Use proper exit mechanism
-        }
+        return result.hasFailures
     }
 }
 

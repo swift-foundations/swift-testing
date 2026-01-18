@@ -21,18 +21,16 @@ let package = Package(
     ],
     dependencies: [
         // Tier 1: Primitives
-        .package(url: "https://github.com/swift-primitives/swift-test-primitives.git", from: "0.0.1"),
-        .package(url: "https://github.com/swift-primitives/swift-standard-library-extensions.git", from: "0.0.1"),
+        .package(path: "../../swift-primitives/swift-test-primitives"),
+        .package(path: "../../swift-primitives/swift-standard-library-extensions"),
         // Tier 2: Runner infrastructure
-        .package(url: "https://github.com/swift-foundations/swift-tests.git", from: "0.0.1"),
+        .package(path: "../swift-tests"),
         // Platform abstraction (file I/O, environment variables)
-        .package(url: "https://github.com/swift-foundations/swift-kernel.git", from: "0.0.1"),
+        .package(path: "../swift-kernel"),
         // Dynamic loader (symbol lookup)
-        .package(url: "https://github.com/swift-foundations/swift-loader.git", from: "0.0.1"),
+        .package(path: "../swift-loader"),
         // Macro implementation
         .package(url: "https://github.com/swiftlang/swift-syntax", "600.0.0"..<"603.0.0"),
-        // Macro testing utilities
-        .package(url: "https://github.com/swift-foundations/swift-testing-extras.git", from: "0.0.1"),
     ],
     targets: [
         // UMBRELLA TARGET - what users import as "Testing"
@@ -74,7 +72,6 @@ let package = Package(
             name: "Testing Tests",
             dependencies: [
                 "Testing",
-                .product(name: "Testing Extras", package: "swift-testing-extras"),
             ],
             path: "Tests/Testing Tests"
         ),

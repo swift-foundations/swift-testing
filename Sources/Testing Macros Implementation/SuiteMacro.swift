@@ -36,32 +36,63 @@ public struct SuiteMacro: MemberMacro, MemberAttributeMacro {
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
         let typeName = extractTypeName(from: declaration)
-        let moduleName = context.lexicalContext.first.map { "\($0)" } ?? "Unknown"
-        let symbolName = "__swift_suite_factory$\(moduleName)$\(typeName)"
-        let factoryFuncName = "__swift_suite_factory_\(typeName)"
+
+        // Generate unique names using the macro context
+        let accessorName = context.makeUniqueName("suite_accessor")
+        let recordName = context.makeUniqueName("suite_record")
 
         let traits = extractTraits(from: node)
 
-        let factory: DeclSyntax = """
-            @_cdecl("\(raw: symbolName)")
-            @usableFromInline
-            static func \(raw: factoryFuncName)() -> UnsafeRawPointer {
+        // 1. Generate the accessor as a static nonisolated let with a closure
+        let accessor: DeclSyntax = """
+            @available(*, deprecated, message: "This is an implementation detail of the testing library. Do not use it directly.")
+            private nonisolated static let \(accessorName): Testing.__TestContentRecordAccessor = { outValue, type, _, _ in
+                let fileID = #fileID
+                let moduleName = String(fileID.prefix(while: { $0 != "/" }))
                 let registration = Testing.SuiteRegistration(
-                    id: "\(raw: typeName)",
-                    traits: \(raw: traits),
-                    sourceLocation: Test.Source.Location(
-                        fileID: #fileID,
-                        filePath: #filePath,
-                        line: #line,
-                        column: 1
-                    )
+                    id: Testing.__TestID(
+                        module: moduleName,
+                        suite: "\(raw: typeName)",
+                        name: "",
+                        sourceLocation: Testing.__TestSourceLocation(
+                            fileID: fileID,
+                            filePath: #filePath,
+                            line: #line,
+                            column: 1
+                        )
+                    ),
+                    traits: \(raw: traits)
                 )
                 let boxed = Testing.Box(registration)
-                return UnsafeRawPointer(Unmanaged.passRetained(boxed).toOpaque())
+                let ptr = Unmanaged.passRetained(boxed).toOpaque()
+                outValue.storeBytes(of: ptr, as: UnsafeRawPointer?.self)
+                return true
             }
             """
 
-        return [factory]
+        // 2. Generate the section record
+        let record: DeclSyntax = """
+            #if hasFeature(SymbolLinkageMarkers)
+            #if os(macOS) || os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
+            @_section("__DATA_CONST,__swift5_tests")
+            #elseif os(Linux) || os(FreeBSD) || os(OpenBSD) || os(Android)
+            @_section("swift5_tests")
+            #elseif os(Windows)
+            @_section(".sw5test$B")
+            #endif
+            @_used
+            #endif
+            @available(*, deprecated, message: "This is an implementation detail of the testing library. Do not use it directly.")
+            private nonisolated static let \(recordName): Testing.__TestContentRecord = (
+                0x74657374,
+                0,
+                unsafe \(accessorName),
+                0,
+                0
+            )
+            """
+
+        return [accessor, record]
     }
 
     // MARK: - MemberAttributeMacro
