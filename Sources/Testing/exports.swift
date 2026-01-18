@@ -18,7 +18,14 @@
 // The umbrella module handles that to ensure macro/type coexistence.
 
 // Re-export Tier 2 (runner infrastructure) for convenience
+// Includes: Test.Runner, Test.Plan, ExclusionController
 @_exported public import Tests
 
 // Platform abstraction for discovery and I/O
 @_exported public import Kernel
+
+// Time primitives for Benchmark/Duration types
+@_exported public import Time_Primitives
+
+// Dependency injection for Test.withDependencies and @Dependency
+@_exported public import Dependencies

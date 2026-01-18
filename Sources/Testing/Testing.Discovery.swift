@@ -56,7 +56,7 @@ extension Testing {
             _ buffer: UnsafeRawBufferPointer,
             into registry: inout Test.Plan.Registry
         ) {
-            let recordStride = MemoryLayout<__TestContentRecord>.stride
+            let recordStride = MemoryLayout<Test.__TestContentRecord>.stride
 
             // Validate section size is a multiple of record stride
             guard buffer.count % recordStride == 0 else {
@@ -70,8 +70,8 @@ extension Testing {
                 let offset = j * recordStride
 
                 // Use alignment-safe loading by copying to stack-allocated storage
-                let record: __TestContentRecord = withUnsafeTemporaryAllocation(
-                    of: __TestContentRecord.self,
+                let record: Test.__TestContentRecord = withUnsafeTemporaryAllocation(
+                    of: Test.__TestContentRecord.self,
                     capacity: 1
                 ) { temp in
                     // Copy bytes to properly aligned temporary storage
@@ -83,7 +83,7 @@ extension Testing {
                 }
 
                 // Check if this is a test record (kind == 'test')
-                guard record.kind == __TestContentKind.test.rawValue else {
+                guard record.kind == Test.__TestContentKind.test.rawValue else {
                     continue
                 }
 
@@ -105,7 +105,7 @@ extension Testing {
                 }
 
                 // Unbox the registration
-                let boxed = Unmanaged<Box<Registration>>.fromOpaque(ptr).takeRetainedValue()
+                let boxed = Unmanaged<Test.Box<Test.Registration>>.fromOpaque(ptr).takeRetainedValue()
                 let reg = boxed.value
 
                 registry.add(id: reg.id, traits: reg.traits, body: reg.body)
@@ -137,7 +137,7 @@ extension Testing {
                 let factory = unsafeBitCast(ptr, to: Factory.self)
                 let boxedPtr = factory()
 
-                let boxed = Unmanaged<Box<Registration>>.fromOpaque(boxedPtr).takeRetainedValue()
+                let boxed = Unmanaged<Test.Box<Test.Registration>>.fromOpaque(boxedPtr).takeRetainedValue()
                 let reg = boxed.value
 
                 registry.add(id: reg.id, traits: reg.traits, body: reg.body)

@@ -84,15 +84,4 @@ extension Testing {
     }
 }
 
-// MARK: - Output Format
-
-extension Testing.Configuration {
-    /// Output format for test results.
-    public enum OutputFormat: Sendable {
-        /// Human-readable console output.
-        case console
-        /// JSON output (no Foundation).
-        case json
-    }
-}
 

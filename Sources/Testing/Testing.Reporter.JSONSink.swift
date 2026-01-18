@@ -10,23 +10,7 @@
 // ===----------------------------------------------------------------------===//
 
 public import Test_Primitives
-
-extension Testing {
-    /// JSON reporter factory.
-    public enum Reporter {
-        /// Creates a JSON reporter.
-        ///
-        /// - Parameter path: File path for output, or nil for stdout.
-        /// - Returns: A reporter that outputs JSON.
-        public static func json(to path: String?) -> Test.Reporter {
-            Test.Reporter {
-                Test.Reporter.Sink(JSONSink(outputPath: path))
-            }
-        }
-    }
-}
-
-// MARK: - JSON Sink
+import Kernel
 
 /**
  Pending: Replace with swift-json when available.

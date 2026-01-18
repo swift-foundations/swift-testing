@@ -9,8 +9,9 @@
 //
 // ===----------------------------------------------------------------------===//
 
+public import Dependencies
+public import Witnesses
 import Kernel
-import Synchronization
 
 extension Testing {
     /// SwiftPM entry point for test execution.
@@ -21,7 +22,7 @@ extension Testing {
     ///
     /// - Returns: Never returns; exits the process.
     public static func __swiftPMEntryPoint() async -> Never {
-        let fallbackNames = Manifest.getFactoryNames()
+        let fallbackNames = Test.Manifest.getFactoryNames()
         let registry = Discovery.discoverAll(fallbackFactoryNames: fallbackNames)
         let hasFailures = await runReturningResult(registry: registry)
         POSIX.Kernel.Process.Exit.now(hasFailures ? 1 : 0)
@@ -59,7 +60,7 @@ extension Testing {
     public static func main() async {
         // Primary: section-based discovery (automatic)
         // Fallback: dlsym with manifest factory names
-        let fallbackNames = Manifest.getFactoryNames()
+        let fallbackNames = Test.Manifest.getFactoryNames()
         let registry = Discovery.discoverAll(fallbackFactoryNames: fallbackNames)
         await run(registry: registry)
     }
@@ -94,49 +95,21 @@ extension Testing {
         let reporter: Test.Reporter
         switch config.outputFormat {
         case .console:
-            reporter = Test.Reporter.console
+            reporter = Testing.Reporter.console
         case .json:
-            reporter = Reporter.json(to: config.outputPath)
+            reporter = Testing.Reporter.json(to: config.outputPath)
         }
 
         // Create and run the runner
         let runner = Test.Runner(reporter: reporter)
-        let result = await runner.run(plan, concurrency: config.concurrency)
+
+        // Execute tests in test mode context.
+        // This ensures all dependencies resolve to testValue by default.
+        let result = await Witness.Context.with(mode: .test) {
+            await runner.run(plan, concurrency: config.concurrency)
+        }
 
         return result.hasFailures
     }
 }
 
-// MARK: - Manifest
-
-extension Testing {
-    /// Manifest of test factory symbol names.
-    ///
-    /// In the full implementation, this would be generated at compile time
-    /// by collecting all @Test macro expansions.
-    public enum Manifest {
-        /// Thread-safe storage for factory names.
-        private static let _factoryNames = Mutex<[String]>([])
-
-        /// Gets the current list of factory names.
-        public static func getFactoryNames() -> [String] {
-            _factoryNames.withLock { $0 }
-        }
-
-        /// Registers a factory name at runtime.
-        ///
-        /// This is a fallback for when compile-time collection is not available.
-        public static func register(_ name: String) {
-            _factoryNames.withLock { names in
-                names.append(name)
-            }
-        }
-
-        /// Registers multiple factory names at runtime.
-        public static func register(_ names: [String]) {
-            _factoryNames.withLock { existing in
-                existing.append(contentsOf: names)
-            }
-        }
-    }
-}

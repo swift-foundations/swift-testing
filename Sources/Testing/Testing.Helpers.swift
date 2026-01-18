@@ -108,13 +108,13 @@ extension Testing {
         body: Test.Body,
         suiteID: String? = nil
     ) -> UnsafeRawPointer {
-        let registration = Registration(
+        let registration = Test.Registration(
             id: id,
             traits: traits,
             body: body,
             suiteID: suiteID
         )
-        let boxed = Box(registration)
+        let boxed = Test.Box(registration)
         return UnsafeRawPointer(Unmanaged.passRetained(boxed).toOpaque())
     }
 }
