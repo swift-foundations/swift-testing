@@ -25,6 +25,7 @@ let package = Package(
         // Tier 1: Primitives
         .package(path: "../../swift-primitives/swift-standard-library-extensions"),
         .package(path: "../../swift-primitives/swift-time-primitives"),
+        .package(path: "../../swift-primitives/swift-test-primitives"),
         // Tier 2: Runner infrastructure
         .package(path: "../swift-tests"),
         // Platform abstraction (file I/O, environment variables)
