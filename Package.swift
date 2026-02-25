@@ -93,7 +93,13 @@ let package = Package(
                 .product(name: "Effects Testing", package: "swift-effects")
             ],
             path: "Sources/Testing Effects"
-        )
+        ),
+        .testTarget(
+            name: "Testing Tests",
+            dependencies: [
+                "Testing",
+            ]
+        ),
     ],
     swiftLanguageModes: [.v6]
 )
@@ -104,6 +110,7 @@ for target in package.targets where ![.system, .binary, .plugin, .macro].contain
         .enableUpcomingFeature("ExistentialAny"),
         .enableUpcomingFeature("InternalImportsByDefault"),
         .enableUpcomingFeature("MemberImportVisibility"),
+        .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
         .enableExperimentalFeature("Lifetimes"),
         .enableExperimentalFeature("SuppressedAssociatedTypes"),
         .enableExperimentalFeature("SuppressedAssociatedTypesWithDefaults"),

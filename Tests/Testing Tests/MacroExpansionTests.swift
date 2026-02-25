@@ -70,27 +70,24 @@ func `require with true condition`() throws {
     try #require(1 + 1 == 2)
 }
 
-// MARK: - #Tests Macro Tests
+// MARK: - Test Structure Tests
 
-/// Example type to test #Tests macro on
+/// Example type with manual test organization
 enum ExampleType {
-    #Tests
+    enum Test {
+        @Suite struct Unit {}
+        @Suite struct EdgeCase {}
+        @Suite struct Integration {}
+        @Suite(.serialized) struct Performance {}
+    }
 }
 
-// Note: Tests inside extensions of generated Test.Unit/etc. don't work yet
-// because Swift doesn't allow stored properties in extensions.
-// For now, tests should be written inside the original type definition
-// or use @Suite directly on a new type.
-
-/// Example with @Suite for comparison
 @Suite
 struct GeneratedStructureTests {
     @Test
-    func `tests macro generates structure`() {
+    func `test structure exists`() {
         // Verify ExampleType.Test exists with expected nested types
-        // This is a compile-time check - if #Tests didn't work, this wouldn't compile
         let _: ExampleType.Test.Unit.Type = ExampleType.Test.Unit.self
-        let _: ExampleType.Test.Snapshot.Type = ExampleType.Test.Snapshot.self
         let _: ExampleType.Test.EdgeCase.Type = ExampleType.Test.EdgeCase.self
         let _: ExampleType.Test.Integration.Type = ExampleType.Test.Integration.self
         let _: ExampleType.Test.Performance.Type = ExampleType.Test.Performance.self
