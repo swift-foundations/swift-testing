@@ -11,6 +11,7 @@
 
 internal import Loader
 internal import Loader_Primitives
+internal import Ownership_Primitives
 
 extension Testing {
     /// Test discovery via section enumeration and symbol lookup.

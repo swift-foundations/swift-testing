@@ -19,7 +19,11 @@ let package = Package(
         // Core implementation only (no macros) - for programmatic use
         .library(name: "Testing Core", targets: ["Testing Core"]),
         // Effects integration for testing effect handlers
-        .library(name: "Testing Effects", targets: ["Testing Effects"])
+        .library(name: "Testing Effects", targets: ["Testing Effects"]),
+        .library(
+            name: "Testing Test Support",
+            targets: ["Testing Test Support"]
+        )
     ],
     dependencies: [
         // Tier 1: Primitives
@@ -30,6 +34,8 @@ let package = Package(
         .package(path: "../swift-tests"),
         // Platform abstraction (file I/O, environment variables)
         .package(path: "../swift-kernel"),
+        // Environment variable reading
+        .package(path: "../swift-environment"),
         // Dynamic loader (symbol lookup)
         .package(path: "../swift-loader"),
         // Dependency injection
@@ -68,6 +74,7 @@ let package = Package(
                 .product(name: "Standard Library Extensions", package: "swift-standard-library-extensions"),
                 .product(name: "Time Primitives", package: "swift-time-primitives"),
                 .product(name: "Kernel", package: "swift-kernel"),
+                .product(name: "Environment", package: "swift-environment"),
                 .product(name: "Loader", package: "swift-loader"),
                 .product(name: "Dependencies", package: "swift-dependencies"),
                 .product(name: "Witnesses", package: "swift-witnesses")
@@ -94,10 +101,22 @@ let package = Package(
             ],
             path: "Sources/Testing Effects"
         ),
+        .target(
+            name: "Testing Test Support",
+            dependencies: [
+                "Testing Core",
+                .product(
+                    name: "Tests Test Support",
+                    package: "swift-tests"
+                ),
+            ],
+            path: "Tests/Support"
+        ),
         .testTarget(
             name: "Testing Tests",
             dependencies: [
                 "Testing",
+                "Testing Test Support",
             ]
         ),
     ],

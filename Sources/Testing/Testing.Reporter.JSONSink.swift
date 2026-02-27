@@ -81,13 +81,12 @@ extension Testing.Reporter {
 
         private func writeToFile(path: Swift.String, bytes: [UInt8]) {
             do {
-                // Open the file using C string path
-                let descriptor = try path.withCString { cPath in
-                    try unsafe Kernel.File.Open.open(
-                        unsafePath: cPath,
-                        mode: [.write],
+                let descriptor = try Kernel.Path.scope(path) { pathView in
+                    try unsafe ISO_9945.Kernel.File.Open.open(
+                        path: pathView,
+                        mode: .write,
                         options: [.create, .truncate],
-                        permissions: Kernel.File.Permissions(rawValue: 0o644)
+                        permissions: .standard
                     )
                 }
                 defer { try? Kernel.Close.close(descriptor) }
@@ -106,24 +105,8 @@ extension Testing.Reporter {
         }
 
         private func writeToStdout(bytes: [UInt8]) {
-            #if os(Windows)
-                // Windows: use GetStdHandle
-                // TODO: Implement Windows stdout handle
-            #else
-                // POSIX: stdout is file descriptor 1
-                let stdout = Kernel.Descriptor(rawValue: 1)
-                var remaining = bytes[...]
-                while !remaining.isEmpty {
-                    do {
-                        let written = try remaining.withUnsafeBytes { buffer in
-                            try Kernel.IO.Write.write(stdout, from: buffer)
-                        }
-                        remaining = remaining.dropFirst(written)
-                    } catch {
-                        break
-                    }
-                }
-            #endif
+            // Use Swift's print for stdout — avoids needing raw descriptor construction
+            print(Swift.String(decoding: bytes, as: UTF8.self), terminator: "")
         }
     }
 }

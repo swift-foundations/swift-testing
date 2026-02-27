@@ -25,7 +25,7 @@ extension Testing {
         let fallbackNames = Test.Manifest.getFactoryNames()
         let registry = Discovery.discoverAll(fallbackFactoryNames: fallbackNames)
         let hasFailures = await runReturningResult(registry: registry)
-        POSIX.Kernel.Process.Exit.now(hasFailures ? 1 : 0)
+        ISO_9945.Kernel.Process.Exit.now(hasFailures ? 1 : 0)
     }
 
     /// Main entry point for test execution.

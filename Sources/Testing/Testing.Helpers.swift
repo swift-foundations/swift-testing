@@ -10,6 +10,7 @@
 // ===----------------------------------------------------------------------===//
 
 public import Test_Primitives
+public import Ownership_Primitives
 
 // MARK: - Helpers for Macro Expansion
 

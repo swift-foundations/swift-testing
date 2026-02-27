@@ -10,7 +10,7 @@
 // ===----------------------------------------------------------------------===//
 
 public import Test_Primitives
-internal import Standard_Library_Extensions
+internal import Environment
 
 extension Testing {
     /// Configuration for test execution.
@@ -50,18 +50,18 @@ extension Testing {
         public static func fromEnvironment() -> Configuration {
             var config = Configuration()
 
-            if let filter = unsafe Kernel.Environment.get("SWIFT_TEST_FILTER") {
+            if let filter = Environment.read("SWIFT_TEST_FILTER") {
                 config.filter = filter
             }
 
-            if let tagsString = unsafe Kernel.Environment.get("SWIFT_TEST_TAGS") {
+            if let tagsString = Environment.read("SWIFT_TEST_TAGS") {
                 let tags = tagsString.split(separator: ",").map { tag in
-                    Swift.String(Swift.String(tag).trimming(where: \.isWhitespace))
+                    Swift.String(tag.drop(while: \.isWhitespace))
                 }
                 config.tags = Set(tags)
             }
 
-            if let parallelString = unsafe Kernel.Environment.get("SWIFT_TEST_PARALLEL") {
+            if let parallelString = Environment.read("SWIFT_TEST_PARALLEL") {
                 if parallelString == "0" {
                     config.concurrency = .serial
                 } else if let n = Int(parallelString), n > 0 {
@@ -69,13 +69,13 @@ extension Testing {
                 }
             }
 
-            if let output = unsafe Kernel.Environment.get("SWIFT_TEST_OUTPUT") {
+            if let output = Environment.read("SWIFT_TEST_OUTPUT") {
                 if output.lowercased() == "json" {
                     config.outputFormat = .json
                 }
             }
 
-            if let path = unsafe Kernel.Environment.get("SWIFT_TEST_OUTPUT_PATH") {
+            if let path = Environment.read("SWIFT_TEST_OUTPUT_PATH") {
                 config.outputPath = path
             }
 

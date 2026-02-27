@@ -38,8 +38,8 @@ extension Test {
     /// - Returns: The result of the operation.
     /// - Throws: The typed error from the operation.
     @inlinable
-    public static func withDependencies<T, E: Error>(
-        _ modify: (inout Dependency.Values) -> Void,
+    public static func withDependencies<T, E: Swift.Error>(
+        _ modify: @escaping (inout Dependency.Values) -> Void,
         operation: () throws(E) -> T
     ) throws(E) -> T {
         try Dependencies.withDependencies(mode: .test, modify, operation: operation)
@@ -69,9 +69,9 @@ extension Test {
     /// - Returns: The result of the operation.
     /// - Throws: The typed error from the operation.
     @inlinable
-    public static func withDependencies<T, E: Error>(
+    public static func withDependencies<T, E: Swift.Error>(
         isolation: isolated (any Actor)? = #isolation,
-        _ modify: (inout Dependency.Values) -> Void,
+        _ modify: @escaping (inout Dependency.Values) -> Void,
         operation: () async throws(E) -> T
     ) async throws(E) -> T {
         try await Dependencies.withDependencies(isolation: isolation, mode: .test, modify, operation: operation)
