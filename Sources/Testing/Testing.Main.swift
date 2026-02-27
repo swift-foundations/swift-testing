@@ -9,8 +9,8 @@
 //
 // ===----------------------------------------------------------------------===//
 
-public import Dependencies
-public import Witnesses
+import Dependencies
+import Witnesses
 import Kernel
 
 extension Testing {
@@ -71,7 +71,7 @@ extension Testing {
     /// This bypasses section-based discovery and uses dlsym directly.
     ///
     /// - Parameter factories: List of factory symbol names to discover.
-    public static func main(factories: [String]) async {
+    public static func main(factories: [Swift.String]) async {
         let registry = Discovery.discover(factoryNames: factories)
         await run(registry: registry)
     }

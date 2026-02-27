@@ -10,7 +10,7 @@
 // ===----------------------------------------------------------------------===//
 
 public import Test_Primitives
-public import Time_Primitives
+import Time_Primitives
 
 extension Testing.Reporter {
     /// Creates a console reporter.
@@ -49,7 +49,7 @@ extension Testing.Reporter {
 
             case .testEnded(let result):
                 if let id = event.id {
-                    let symbol: String
+                    let symbol: Swift.String
                     switch result {
                     case .passed:
                         symbol = "✓"

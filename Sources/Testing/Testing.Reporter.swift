@@ -18,7 +18,7 @@ extension Testing {
         ///
         /// - Parameter path: File path for output, or nil for stdout.
         /// - Returns: A reporter that outputs JSON.
-        public static func json(to path: String?) -> Test.Reporter {
+        public static func json(to path: Swift.String?) -> Test.Reporter {
             Test.Reporter {
                 Test.Reporter.Sink(JSONSink(outputPath: path))
             }

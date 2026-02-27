@@ -49,12 +49,12 @@ public import SwiftSyntaxMacrosGenericTestSupport
 ///   - line: Source location info.
 ///   - column: Source location info.
 public func assertMacroExpansion(
-    _ originalSource: String,
-    expandedSource expectedExpandedSource: String,
+    _ originalSource: Swift.String,
+    expandedSource expectedExpandedSource: Swift.String,
     diagnostics: [DiagnosticSpec] = [],
-    macros: [String: any Macro.Type],
-    testModuleName: String = "TestModule",
-    testFileName: String = "test.swift",
+    macros: [Swift.String: any Macro.Type],
+    testModuleName: Swift.String = "TestModule",
+    testFileName: Swift.String = "test.swift",
     indentationWidth: Trivia = .spaces(4),
     fileID: StaticString = #fileID,
     filePath: StaticString = #filePath,

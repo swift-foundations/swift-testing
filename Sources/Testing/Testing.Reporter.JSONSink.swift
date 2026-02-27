@@ -9,7 +9,7 @@
 //
 // ===----------------------------------------------------------------------===//
 
-public import Test_Primitives
+import Test_Primitives
 import Kernel
 
 /**
@@ -24,10 +24,10 @@ extension Testing.Reporter {
     ///
     /// Produces JSON without Foundation by manually constructing UTF-8 bytes.
     final class JSONSink: Test.Reporter.SinkImplementation, @unchecked Sendable {
-        let outputPath: String?
+        let outputPath: Swift.String?
         var events: [Test.Event] = []
 
-        init(outputPath: String?) {
+        init(outputPath: Swift.String?) {
             self.outputPath = outputPath
         }
 
@@ -46,7 +46,7 @@ extension Testing.Reporter {
             }
         }
 
-        private func buildJSON() -> String {
+        private func buildJSON() -> Swift.String {
             var json = "{\n"
             json += "  \"events\": [\n"
 
@@ -65,7 +65,7 @@ extension Testing.Reporter {
             return json
         }
 
-        private func eventToJSON(_ event: Test.Event) -> String {
+        private func eventToJSON(_ event: Test.Event) -> Swift.String {
             // Simplified JSON encoding - production would need proper escaping
             var json = "{"
             json += "\"kind\": \"\(event.kind)\""
@@ -79,11 +79,11 @@ extension Testing.Reporter {
             return json
         }
 
-        private func writeToFile(path: String, bytes: [UInt8]) {
+        private func writeToFile(path: Swift.String, bytes: [UInt8]) {
             do {
                 // Open the file using C string path
                 let descriptor = try path.withCString { cPath in
-                    try Kernel.File.Open.open(
+                    try unsafe Kernel.File.Open.open(
                         unsafePath: cPath,
                         mode: [.write],
                         options: [.create, .truncate],

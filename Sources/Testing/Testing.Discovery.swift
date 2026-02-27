@@ -75,7 +75,7 @@ extension Testing {
                     capacity: 1
                 ) { temp in
                     // Copy bytes to properly aligned temporary storage
-                    UnsafeMutableRawPointer(temp.baseAddress!).copyMemory(
+                    unsafe UnsafeMutableRawPointer(temp.baseAddress!).copyMemory(
                         from: buffer.baseAddress!.advanced(by: offset),
                         byteCount: recordStride
                     )
@@ -93,11 +93,11 @@ extension Testing {
                 }
 
                 var registrationPtr: UnsafeRawPointer? = nil
-                let success = accessor(
+                let success = unsafe accessor(
                     &registrationPtr,
-                    UnsafeRawPointer(bitPattern: 1)!,  // type placeholder
-                    UnsafeRawPointer?(nil),  // hint
-                    0     // reserved
+                    UnsafeRawPointer(bitPattern: 1)!,
+                    UnsafeRawPointer?(nil),
+                    0
                 )
 
                 guard success, let ptr = registrationPtr else {
@@ -105,7 +105,7 @@ extension Testing {
                 }
 
                 // Unbox the registration
-                let boxed = Unmanaged<Test.Box<Test.Registration>>.fromOpaque(ptr).takeRetainedValue()
+                let boxed = unsafe Unmanaged<Test.Box<Test.Registration>>.fromOpaque(ptr).takeRetainedValue()
                 let reg = boxed.value
 
                 registry.add(id: reg.id, traits: reg.traits, body: reg.body)
@@ -125,7 +125,7 @@ extension Testing {
         /// - Parameter factoryNames: List of factory symbol names to look up.
         /// - Returns: A registry containing all discovered tests.
         public static func discover(
-            factoryNames: [String]
+            factoryNames: [Swift.String]
         ) -> Test.Plan.Registry {
             var registry = Test.Plan.Registry()
 
@@ -134,10 +134,10 @@ extension Testing {
                     continue
                 }
 
-                let factory = unsafeBitCast(ptr, to: Factory.self)
+                let factory = unsafe unsafeBitCast(ptr, to: Factory.self)
                 let boxedPtr = factory()
 
-                let boxed = Unmanaged<Test.Box<Test.Registration>>.fromOpaque(boxedPtr).takeRetainedValue()
+                let boxed = unsafe Unmanaged<Test.Box<Test.Registration>>.fromOpaque(boxedPtr).takeRetainedValue()
                 let reg = boxed.value
 
                 registry.add(id: reg.id, traits: reg.traits, body: reg.body)
@@ -151,7 +151,7 @@ extension Testing {
         /// - Parameter name: The symbol name to look up.
         /// - Returns: Pointer to the symbol, or nil if not found.
         @usableFromInline
-        internal static func lookupSymbol(name: String) -> UnsafeRawPointer? {
+        internal static func lookupSymbol(name: Swift.String) -> UnsafeRawPointer? {
             do {
                 return try name.withCString { cName in
                     try Loader.Symbol.lookup(name: cName, in: .default)
@@ -171,7 +171,7 @@ extension Testing {
         /// - Parameter fallbackFactoryNames: Factory names to try if section discovery fails.
         /// - Returns: A registry containing all discovered tests.
         public static func discoverAll(
-            fallbackFactoryNames: [String] = []
+            fallbackFactoryNames: [Swift.String] = []
         ) -> Test.Plan.Registry {
             // Try section-based discovery first
             var registry = discoverFromSections()

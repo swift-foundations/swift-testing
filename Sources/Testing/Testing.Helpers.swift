@@ -23,8 +23,8 @@ extension Testing {
     public static func __expect(
         _ condition: Bool,
         _ comment: Test.Text? = nil,
-        fileID: String = #fileID,
-        filePath: String = #filePath,
+        fileID: Swift.String = #fileID,
+        filePath: Swift.String = #filePath,
         line: Int = #line,
         column: Int = #column
     ) -> Test.Expectation {
@@ -46,11 +46,11 @@ extension Testing {
     public static func __require(
         _ condition: Bool,
         _ comment: Test.Text? = nil,
-        fileID: String = #fileID,
-        filePath: String = #filePath,
+        fileID: Swift.String = #fileID,
+        filePath: Swift.String = #filePath,
         line: Int = #line,
         column: Int = #column
-    ) throws {
+    ) throws(Test.Requirement.Failed) {
         try require(
             condition,
             comment,
@@ -69,11 +69,11 @@ extension Testing {
     public static func __require<T>(
         _ optional: T?,
         _ comment: Test.Text? = nil,
-        fileID: String = #fileID,
-        filePath: String = #filePath,
+        fileID: Swift.String = #fileID,
+        filePath: Swift.String = #filePath,
         line: Int = #line,
         column: Int = #column
-    ) throws -> T {
+    ) throws(Test.Requirement.Failed) -> T {
         try require(
             optional,
             comment,
@@ -106,7 +106,7 @@ extension Testing {
         id: Test.ID,
         traits: [Test.Trait],
         body: Test.Body,
-        suiteID: String? = nil
+        suiteID: Swift.String? = nil
     ) -> UnsafeRawPointer {
         let registration = Test.Registration(
             id: id,
@@ -115,6 +115,6 @@ extension Testing {
             suiteID: suiteID
         )
         let boxed = Test.Box(registration)
-        return UnsafeRawPointer(Unmanaged.passRetained(boxed).toOpaque())
+        return unsafe UnsafeRawPointer(Unmanaged.passRetained(boxed).toOpaque())
     }
 }

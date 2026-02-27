@@ -23,10 +23,10 @@ extension Testing {
     /// - `SWIFT_TEST_OUTPUT_PATH`: File path for output
     public struct Configuration: Sendable {
         /// Filter tests by name substring.
-        public var filter: String?
+        public var filter: Swift.String?
 
         /// Filter tests by tags.
-        public var tags: Set<String>?
+        public var tags: Set<Swift.String>?
 
         /// Concurrency mode for test execution.
         public var concurrency: Test.Runner.Concurrency
@@ -35,7 +35,7 @@ extension Testing {
         public var outputFormat: OutputFormat
 
         /// File path for output (nil = stdout).
-        public var outputPath: String?
+        public var outputPath: Swift.String?
 
         /// Creates a default configuration.
         public init() {
@@ -50,18 +50,18 @@ extension Testing {
         public static func fromEnvironment() -> Configuration {
             var config = Configuration()
 
-            if let filter = Kernel.Environment.get("SWIFT_TEST_FILTER") {
+            if let filter = unsafe Kernel.Environment.get("SWIFT_TEST_FILTER") {
                 config.filter = filter
             }
 
-            if let tagsString = Kernel.Environment.get("SWIFT_TEST_TAGS") {
+            if let tagsString = unsafe Kernel.Environment.get("SWIFT_TEST_TAGS") {
                 let tags = tagsString.split(separator: ",").map { tag in
-                    String(String(tag).trimming(where: \.isWhitespace))
+                    Swift.String(Swift.String(tag).trimming(where: \.isWhitespace))
                 }
                 config.tags = Set(tags)
             }
 
-            if let parallelString = Kernel.Environment.get("SWIFT_TEST_PARALLEL") {
+            if let parallelString = unsafe Kernel.Environment.get("SWIFT_TEST_PARALLEL") {
                 if parallelString == "0" {
                     config.concurrency = .serial
                 } else if let n = Int(parallelString), n > 0 {
@@ -69,13 +69,13 @@ extension Testing {
                 }
             }
 
-            if let output = Kernel.Environment.get("SWIFT_TEST_OUTPUT") {
+            if let output = unsafe Kernel.Environment.get("SWIFT_TEST_OUTPUT") {
                 if output.lowercased() == "json" {
                     config.outputFormat = .json
                 }
             }
 
-            if let path = Kernel.Environment.get("SWIFT_TEST_OUTPUT_PATH") {
+            if let path = unsafe Kernel.Environment.get("SWIFT_TEST_OUTPUT_PATH") {
                 config.outputPath = path
             }
 
