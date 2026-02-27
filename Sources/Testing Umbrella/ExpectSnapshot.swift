@@ -61,7 +61,7 @@
 public macro expectSnapshot<Value, Format>(
     _ value: Value,
     as strategy: Test.Snapshot.Strategy<Value, Format>,
-    named name: String? = nil
+    named name: Swift.String? = nil
 ) -> Test.Expectation = #externalMacro(
     module: "Testing_Macros_Implementation",
     type: "ExpectSnapshotMacro"
@@ -77,12 +77,12 @@ public macro expectSnapshot<Value, Format>(
 public func __expectSnapshot<Value: Sendable, Format: Sendable>(
     _ value: Value,
     as strategy: Test.Snapshot.Strategy<Value, Format>,
-    named name: String? = nil,
-    fileID: String = #fileID,
-    filePath: String = #filePath,
+    named name: Swift.String? = nil,
+    fileID: Swift.String = #fileID,
+    filePath: Swift.String = #filePath,
     line: Int = #line,
     column: Int = #column,
-    function: String = #function
+    function: Swift.String = #function
 ) -> Test.Expectation {
     assertSnapshot(
         of: value,
@@ -101,12 +101,12 @@ public func __expectSnapshot<Value: Sendable, Format: Sendable>(
 public func __expectSnapshot<Value: Sendable, Format: Sendable>(
     _ value: Value,
     as strategy: Test.Snapshot.Strategy<Value, Format>,
-    named name: String? = nil,
-    fileID: String = #fileID,
-    filePath: String = #filePath,
+    named name: Swift.String? = nil,
+    fileID: Swift.String = #fileID,
+    filePath: Swift.String = #filePath,
     line: Int = #line,
     column: Int = #column,
-    function: String = #function
+    function: Swift.String = #function
 ) async -> Test.Expectation {
     await assertSnapshot(
         of: value,

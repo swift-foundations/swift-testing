@@ -33,13 +33,13 @@ extension Testing {
 
             // Enumerate all test content sections
             for bounds in Loader.Section.all(.swiftTestContent) {
-                parseTestContentSection(bounds.buffer, into: &registry)
+                unsafe parseTestContentSection(bounds.buffer, into: &registry)
             }
 
             // Also check fallback section (older Darwin binaries use __DATA instead of __DATA_CONST)
             #if canImport(Darwin)
             for bounds in Loader.Section.all(.swiftTestContentFallback) {
-                parseTestContentSection(bounds.buffer, into: &registry)
+                unsafe parseTestContentSection(bounds.buffer, into: &registry)
             }
             #endif
 
@@ -57,7 +57,7 @@ extension Testing {
             _ buffer: UnsafeRawBufferPointer,
             into registry: inout Test.Plan.Registry
         ) {
-            let recordStride = MemoryLayout<Test.__TestContentRecord>.stride
+            let recordStride = unsafe MemoryLayout<Test.__TestContentRecord>.stride
 
             // Validate section size is a multiple of record stride
             guard buffer.count % recordStride == 0 else {
@@ -71,25 +71,24 @@ extension Testing {
                 let offset = j * recordStride
 
                 // Use alignment-safe loading by copying to stack-allocated storage
-                let record: Test.__TestContentRecord = withUnsafeTemporaryAllocation(
+                let record: Test.__TestContentRecord = unsafe withUnsafeTemporaryAllocation(
                     of: Test.__TestContentRecord.self,
                     capacity: 1
                 ) { temp in
-                    // Copy bytes to properly aligned temporary storage
                     unsafe UnsafeMutableRawPointer(temp.baseAddress!).copyMemory(
                         from: buffer.baseAddress!.advanced(by: offset),
                         byteCount: recordStride
                     )
-                    return temp[0]
+                    return unsafe temp[0]
                 }
 
                 // Check if this is a test record (kind == 'test')
-                guard record.kind == Test.__TestContentKind.test.rawValue else {
+                guard unsafe record.kind == Test.__TestContentKind.test.rawValue else {
                     continue
                 }
 
                 // Call the accessor to get the registration
-                guard let accessor = record.accessor else {
+                guard let accessor = unsafe record.accessor else {
                     continue
                 }
 
@@ -101,7 +100,7 @@ extension Testing {
                     0
                 )
 
-                guard success, let ptr = registrationPtr else {
+                guard success, let ptr = unsafe registrationPtr else {
                     continue
                 }
 
@@ -131,12 +130,12 @@ extension Testing {
             var registry = Test.Plan.Registry()
 
             for name in factoryNames {
-                guard let ptr = lookupSymbol(name: name) else {
+                guard let ptr = unsafe lookupSymbol(name: name) else {
                     continue
                 }
 
                 let factory = unsafe unsafeBitCast(ptr, to: Factory.self)
-                let boxedPtr = factory()
+                let boxedPtr = unsafe factory()
 
                 let boxed = unsafe Unmanaged<Test.Box<Test.Registration>>.fromOpaque(boxedPtr).takeRetainedValue()
                 let reg = boxed.value
@@ -154,8 +153,8 @@ extension Testing {
         @usableFromInline
         internal static func lookupSymbol(name: Swift.String) -> UnsafeRawPointer? {
             do {
-                return try name.withCString { cName in
-                    try Loader.Symbol.lookup(name: cName, in: .default)
+                return try unsafe name.withCString { cName in
+                    try unsafe Loader.Symbol.lookup(name: cName, in: .default)
                 }
             } catch {
                 return nil
