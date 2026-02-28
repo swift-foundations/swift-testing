@@ -39,7 +39,7 @@ let package = Package(
         // Dynamic loader (symbol lookup)
         .package(path: "../swift-loader"),
         // Dependency injection
-        .package(path: "../swift-dependencies"),
+        .package(path: "../swift-dependencies", traits: ["Clocks"]),
         // Effects system (for optional Testing Effects target)
         .package(path: "../swift-effects"),
         // Witness system (mode context for test/live execution)

@@ -22,8 +22,8 @@ extension Testing {
     /// Unambiguous reference to Test.ID for macro expansions.
     public typealias __TestID = Test_Primitives.Test.ID
 
-    /// Unambiguous reference to Test.Source.Location for macro expansions.
-    public typealias __TestSourceLocation = Test_Primitives.Test.Source.Location
+    /// Unambiguous reference to Source.Location for macro expansions.
+    public typealias __TestSourceLocation = Source.Location
 
     /// Unambiguous reference to Test.Trait for macro expansions.
     public typealias __TestTrait = Test_Primitives.Test.Trait
