@@ -116,6 +116,19 @@ extension Testing {
         var runner = Test.Runner(reporter: reporter)
         runner.scopeProviders.append(.snapshot)
 
+        // Append inline snapshot write-back action
+        runner.postRunActions.append {
+            let state = Test.Snapshot.Inline.state
+            guard !state.isEmpty else { return }
+            do {
+                try Test.Snapshot.Inline.Rewriter.writeAll(from: state.drain())
+            } catch {
+                // Non-fatal: inline snapshot write failure should not change test results.
+                // The test already reported a failure asking the user to re-run.
+                print("Warning: Failed to write inline snapshots: \(error)")
+            }
+        }
+
         // Execute tests in test mode context.
         // This ensures all dependencies resolve to testValue by default.
         let result = await Witness.Context.with(mode: .test) {

@@ -110,6 +110,26 @@ extension Showcase.Document.Test.Snapshot {
         #expectSnapshot(doc.render(), as: .lines, named: "with_conclusion")
     }
 
+    // Inline snapshot: expected value embedded in source
+    // Uses Point-Free-compatible assertInlineSnapshot(of:, as:) syntax
+    @Test
+    func example_document_inline() {
+        let doc = Showcase.Document.example
+
+        assertInlineSnapshot(of: doc.render(), as: .lines) {
+            """
+            # Getting Started
+
+            ## Installation
+            Add the package dependency.
+
+            ## Usage
+            Import the module and call the API.
+
+            """
+        }
+    }
+
     // Pullback: snapshot a Document directly as rendered markdown
     @Test
     func rendered_via_pullback() {

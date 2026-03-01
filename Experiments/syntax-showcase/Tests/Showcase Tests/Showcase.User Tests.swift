@@ -118,6 +118,21 @@ extension Showcase.User.Test.Snapshot {
         #expectSnapshot(guest.description, as: .lines, named: "guest")
     }
 
+    // Inline snapshots: expected value embedded directly in source
+    // Uses Point-Free-compatible assertInlineSnapshot(of:, as:) syntax
+    @Test
+    func user_inline_description() {
+        let user = Showcase.User(name: "Alice", email: "alice@example.com", role: .admin)
+
+        assertInlineSnapshot(of: user.description, as: .lines) {
+            """
+            User: Alice
+            Email: alice@example.com
+            Role: admin
+            """
+        }
+    }
+
     // Custom strategy via pullback: snapshot a User directly
     @Test
     func user_profile_card() {

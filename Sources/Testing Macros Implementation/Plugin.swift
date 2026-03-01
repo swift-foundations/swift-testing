@@ -21,5 +21,6 @@ struct TestingMacrosPlugin: CompilerPlugin {
         ExpectMacro.self,
         RequireMacro.self,
         ExpectSnapshotMacro.self,
+        ExpectInlineSnapshotMacro.self,
     ]
 }
