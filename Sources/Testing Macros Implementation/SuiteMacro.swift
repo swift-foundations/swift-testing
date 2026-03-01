@@ -84,7 +84,7 @@ public struct SuiteMacro: MemberMacro, MemberAttributeMacro {
             #endif
             @available(*, deprecated, message: "This is an implementation detail of the testing library. Do not use it directly.")
             private nonisolated static let \(recordName): Testing.__TestContentRecord = (
-                0x74657374,
+                0x73756974,
                 0,
                 unsafe \(accessorName),
                 0,
