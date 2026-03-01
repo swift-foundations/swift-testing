@@ -14,18 +14,20 @@ public import SwiftSyntaxMacroExpansion
 public import SwiftSyntaxMacros
 public import SwiftSyntaxMacrosGenericTestSupport
 public import Test_Primitives
+public import Tests
 
 /// Asserts that a macro expands to the expected source code.
 ///
 /// This function bridges `SwiftSyntaxMacrosGenericTestSupport` to Swift Testing
-/// by providing a failure handler that calls `Issue.record()`.
+/// by collecting expansion failures and throwing `Test.Requirement.Failed`
+/// on the first mismatch.
 ///
 /// ## Example
 ///
 /// ```swift
 /// @Test
-/// func testMacroExpansion() {
-///     assertMacroExpansion(
+/// func testMacroExpansion() throws {
+///     try assertMacroExpansion(
 ///         """
 ///         #myMacro
 ///         """,
@@ -61,7 +63,9 @@ public func assertMacroExpansion(
     filePath: StaticString = #filePath,
     line: UInt = #line,
     column: UInt = #column
-) {
+) throws(Test.Requirement.Failed) {
+    var failures: [(message: Swift.String, location: Source.Location)] = []
+
     SwiftSyntaxMacrosGenericTestSupport.assertMacroExpansion(
         originalSource,
         expandedSource: expectedExpandedSource,
@@ -71,19 +75,26 @@ public func assertMacroExpansion(
         testFileName: testFileName,
         indentationWidth: indentationWidth,
         failureHandler: { spec in
-            Issue.record(
-                Comment(rawValue: spec.message),
-                sourceLocation: SourceLocation(
+            failures.append((
+                message: spec.message,
+                location: Source.Location(
                     fileID: spec.location.fileID,
                     filePath: spec.location.filePath,
                     line: Int(spec.location.line),
                     column: Int(spec.location.column)
                 )
-            )
+            ))
         },
         fileID: fileID,
         filePath: filePath,
         line: line,
         column: column
     )
+
+    if let first = failures.first {
+        throw Test.Requirement.Failed(
+            message: Test.Text(first.message),
+            sourceLocation: first.location
+        )
+    }
 }

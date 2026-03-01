@@ -31,4 +31,21 @@ extension Testing {
     /// Unambiguous reference to Test.Body for macro expansions.
     /// Note: Test.Body is defined in the Tests module as an extension on Test.
     public typealias __TestBody = Test.Body
+
+    /// Unambiguous reference to Test.__TestContentRecord for macro expansions.
+    public typealias __TestContentRecord = Test.__TestContentRecord
+
+    /// Unambiguous reference to Test.__TestContentRecordAccessor for macro expansions.
+    public typealias __TestContentRecordAccessor = Test.__TestContentRecordAccessor
+
+    /// Unambiguous reference to Test.Registration for macro expansions.
+    public typealias Registration = Test.Registration
+
+    /// Unambiguous reference to Test.Suite.Registration for macro expansions.
+    public typealias SuiteRegistration = Test.Suite.Registration
+
+    /// Box type for passing registrations through C-convention accessors.
+    /// Delegates to Test.Box (= Ownership.Shared) so macro-generated code
+    /// and section-based discovery use the same concrete type.
+    public typealias Box<T: Sendable> = Test.Box<T>
 }

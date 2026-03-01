@@ -76,6 +76,18 @@ extension Testing {
         await run(registry: registry)
     }
 
+    /// Runs all discovered tests and returns whether any failed.
+    ///
+    /// Use this for programmatic test execution (e.g., XCTest bridges).
+    /// Discovers tests from section records and executes them with console output.
+    ///
+    /// - Returns: `true` if any test failed, `false` if all passed.
+    public static func runAll() async -> Bool {
+        let fallbackNames = Test.Manifest.getFactoryNames()
+        let registry = Discovery.discoverAll(fallbackFactoryNames: fallbackNames)
+        return await runReturningResult(registry: registry)
+    }
+
     /// Internal runner that executes a test plan from a registry.
     private static func run(registry: consuming Test.Plan.Registry) async {
         _ = await runReturningResult(registry: registry)

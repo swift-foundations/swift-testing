@@ -89,7 +89,7 @@ public struct TestMacro: PeerMacro {
             @available(*, deprecated, message: "This is an implementation detail of the testing library. Do not use it directly.")
             private \(raw: staticKeyword)nonisolated let \(accessorName): Testing.__TestContentRecordAccessor = { outValue, type, _, _ in
                 let fileID = #fileID
-                let moduleName = String(fileID.prefix(while: { $0 != "/" }))
+                let moduleName = Swift.String(fileID.prefix(while: { $0 != "/" }))
                 let registration = Testing.Registration(
                     id: Testing.__TestID(
                         module: moduleName,

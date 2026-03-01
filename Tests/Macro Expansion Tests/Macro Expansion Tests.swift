@@ -11,8 +11,8 @@ struct MacroExpansionTests {
 
 extension MacroExpansionTests.Unit {
     @Testing.Test
-    func `expect macro expands to __expect call`() {
-        assertMacroExpansion(
+    func `expect macro expands to __expect call`() throws {
+        try assertMacroExpansion(
             """
             #expect(x == 1)
             """,
@@ -31,8 +31,8 @@ extension MacroExpansionTests.Unit {
     }
 
     @Testing.Test
-    func `expect with comment expands correctly`() {
-        assertMacroExpansion(
+    func `expect with comment expands correctly`() throws {
+        try assertMacroExpansion(
             """
             #expect(x == 1, "values should match")
             """,
@@ -51,8 +51,8 @@ extension MacroExpansionTests.Unit {
     }
 
     @Testing.Test
-    func `require macro expands to try __require call`() {
-        assertMacroExpansion(
+    func `require macro expands to try __require call`() throws {
+        try assertMacroExpansion(
             """
             #require(isValid)
             """,
@@ -71,8 +71,8 @@ extension MacroExpansionTests.Unit {
     }
 
     @Testing.Test
-    func `require with comment expands correctly`() {
-        assertMacroExpansion(
+    func `require with comment expands correctly`() throws {
+        try assertMacroExpansion(
             """
             #require(isValid, "must be valid")
             """,
@@ -91,8 +91,8 @@ extension MacroExpansionTests.Unit {
     }
 
     @Testing.Test
-    func `expectSnapshot macro expands to __expectSnapshot call`() {
-        assertMacroExpansion(
+    func `expectSnapshot macro expands to __expectSnapshot call`() throws {
+        try assertMacroExpansion(
             """
             #expectSnapshot(output, as: .lines)
             """,
@@ -113,8 +113,8 @@ extension MacroExpansionTests.Unit {
     }
 
     @Testing.Test
-    func `Tests macro expands to enum with 5 suites`() {
-        assertMacroExpansion(
+    func `Tests macro expands to enum with 5 suites`() throws {
+        try assertMacroExpansion(
             """
             extension MyType {
                 #Tests

@@ -82,7 +82,7 @@ extension Testing.Reporter {
         private func writeToFile(path: Swift.String, bytes: [UInt8]) {
             do {
                 let descriptor = try Kernel.Path.scope(path) { pathView in
-                    try unsafe ISO_9945.Kernel.File.Open.open(
+                    try ISO_9945.Kernel.File.Open.open(
                         path: pathView,
                         mode: .write,
                         options: [.create, .truncate],
@@ -94,8 +94,8 @@ extension Testing.Reporter {
                 // Write all bytes
                 var remaining = bytes[...]
                 while !remaining.isEmpty {
-                    let written = try remaining.withUnsafeBytes { buffer in
-                        try Kernel.IO.Write.write(descriptor, from: buffer)
+                    let written = try unsafe remaining.withUnsafeBytes { buffer in
+                        try unsafe Kernel.IO.Write.write(descriptor, from: buffer)
                     }
                     remaining = remaining.dropFirst(written)
                 }

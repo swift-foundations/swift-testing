@@ -48,7 +48,7 @@ public struct SuiteMacro: MemberMacro, MemberAttributeMacro {
             @available(*, deprecated, message: "This is an implementation detail of the testing library. Do not use it directly.")
             private nonisolated static let \(accessorName): Testing.__TestContentRecordAccessor = { outValue, type, _, _ in
                 let fileID = #fileID
-                let moduleName = String(fileID.prefix(while: { $0 != "/" }))
+                let moduleName = Swift.String(fileID.prefix(while: { $0 != "/" }))
                 let registration = Testing.SuiteRegistration(
                     id: Testing.__TestID(
                         module: moduleName,

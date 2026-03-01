@@ -14,24 +14,24 @@ extension Testing {
 
 extension Testing.HelpersTest.Unit {
     @Testing.Test
-    func `__expect with true returns passing expectation`() {
+    func expectWithTrueReturnsPassingExpectation() {
         let expectation = Testing.__expect(true)
         #expect(expectation.isPassing)
     }
 
     @Testing.Test
-    func `__expect with false returns failing expectation`() {
+    func expectWithFalseReturnsFailingExpectation() {
         let expectation = Testing.__expect(false)
         #expect(expectation.isFailing)
     }
 
     @Testing.Test
-    func `__require with true does not throw`() throws {
+    func requireWithTrueDoesNotThrow() throws {
         try Testing.__require(true)
     }
 
     @Testing.Test
-    func `__require with non-nil optional returns unwrapped value`() throws {
+    func requireWithNonNilOptionalReturnsUnwrappedValue() throws {
         let value: Int? = 42
         let unwrapped = try Testing.__require(value)
         #expect(unwrapped == 42)
@@ -42,17 +42,27 @@ extension Testing.HelpersTest.Unit {
 
 extension Testing.HelpersTest.EdgeCase {
     @Testing.Test
-    func `__require with false throws`() {
-        #expect(throws: Test_Primitives.Test.Requirement.Failed.self) {
+    func requireWithFalseThrows() {
+        do {
             try Testing.__require(false)
+            #expect(Bool(false), "Expected __require(false) to throw")
+        } catch is Test_Primitives.Test.Requirement.Failed {
+            // Expected
+        } catch {
+            #expect(Bool(false), "Unexpected error type: \(error)")
         }
     }
 
     @Testing.Test
-    func `__require with nil optional throws`() {
+    func requireWithNilOptionalThrows() {
         let value: Int? = nil
-        #expect(throws: Test_Primitives.Test.Requirement.Failed.self) {
+        do {
             try Testing.__require(value)
+            #expect(Bool(false), "Expected __require(nil) to throw")
+        } catch is Test_Primitives.Test.Requirement.Failed {
+            // Expected
+        } catch {
+            #expect(Bool(false), "Unexpected error type: \(error)")
         }
     }
 }

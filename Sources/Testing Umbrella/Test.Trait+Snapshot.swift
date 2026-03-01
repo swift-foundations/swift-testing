@@ -64,7 +64,7 @@ extension Test.Trait {
 
 // MARK: - Traits Collection Extension
 
-extension Collection where Element == Test.Trait {
+extension Swift.Collection where Element == Test.Trait {
     /// Finds the snapshot recording mode from a collection of traits.
     ///
     /// Returns the first snapshot recording trait found, or nil if none.

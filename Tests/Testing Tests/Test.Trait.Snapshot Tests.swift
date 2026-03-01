@@ -14,7 +14,7 @@ extension Test_Primitives.Test.Trait {
 
 extension Test_Primitives.Test.Trait.SnapshotTest.Unit {
     @Testing.Test
-    func `snapshot trait with each Recording mode creates correct trait`() {
+    func snapshotTraitWithEachRecordingModeCreatesCorrectTrait() {
         for mode in Test_Primitives.Test.Snapshot.Recording.allCases {
             let trait = Test_Primitives.Test.Trait.snapshot(mode)
             #expect(trait.snapshotRecording == mode)
@@ -22,15 +22,15 @@ extension Test_Primitives.Test.Trait.SnapshotTest.Unit {
     }
 
     @Testing.Test
-    func `snapshotRecording extracts recording mode from snapshot trait`() {
+    func snapshotRecordingExtractsRecordingModeFromSnapshotTrait() {
         let trait = Test_Primitives.Test.Trait.snapshot(.all)
         #expect(trait.snapshotRecording == .all)
     }
 
     @Testing.Test
-    func `Collection snapshotRecording finds first snapshot trait`() {
+    func collectionSnapshotRecordingFindsFirstSnapshotTrait() {
         let traits: [Test_Primitives.Test.Trait] = [
-            .enabled(true),
+            .enabled(if: true),
             .snapshot(.never),
             .snapshot(.all),
         ]
@@ -42,13 +42,13 @@ extension Test_Primitives.Test.Trait.SnapshotTest.Unit {
 
 extension Test_Primitives.Test.Trait.SnapshotTest.EdgeCase {
     @Testing.Test
-    func `snapshotRecording returns nil for non-snapshot trait`() {
-        let trait = Test_Primitives.Test.Trait.enabled(true)
+    func snapshotRecordingReturnsNilForNonSnapshotTrait() {
+        let trait = Test_Primitives.Test.Trait.enabled(if: true)
         #expect(trait.snapshotRecording == nil)
     }
 
     @Testing.Test
-    func `Collection snapshotRecording returns nil for empty array`() {
+    func collectionSnapshotRecordingReturnsNilForEmptyArray() {
         let traits: [Test_Primitives.Test.Trait] = []
         #expect(traits.snapshotRecording == nil)
     }

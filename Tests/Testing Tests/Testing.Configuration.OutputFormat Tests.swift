@@ -12,19 +12,19 @@ extension Testing.Configuration.OutputFormat {
 
 extension Testing.Configuration.OutputFormat.Test.Unit {
     @Testing.Test
-    func `console and json cases are distinct`() {
+    func consoleAndJsonCasesAreDistinct() {
         let console = Testing.Configuration.OutputFormat.console
         let json = Testing.Configuration.OutputFormat.json
 
         var config = Testing.Configuration()
         config.outputFormat = console
         if case .json = config.outputFormat {
-            Issue.record("Console should not match json")
+            #expect(Bool(false), "Console should not match json")
         }
 
         config.outputFormat = json
         if case .console = config.outputFormat {
-            Issue.record("JSON should not match console")
+            #expect(Bool(false), "JSON should not match console")
         }
     }
 }

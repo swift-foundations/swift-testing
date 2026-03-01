@@ -10,32 +10,32 @@ struct MacroCompilationTests {
 
 extension MacroCompilationTests.Integration {
     @Testing.Test
-    func `@Test on free function compiles`() {
+    func testOnFreeFunctionCompiles() {
         // This test itself uses @Test — if it compiles, the macro works
     }
 
     @Testing.Test
-    func `@Test async function compiles`() async {
+    func testAsyncFunctionCompiles() async {
         // Async @Test compiles successfully
     }
 
     @Testing.Test
-    func `#expect with bool compiles`() {
+    func expectWithBoolCompiles() {
         #expect(true)
     }
 
     @Testing.Test
-    func `#expect with comment compiles`() {
+    func expectWithCommentCompiles() {
         #expect(true, "always true")
     }
 
     @Testing.Test
-    func `#require with bool compiles`() throws {
+    func requireWithBoolCompiles() throws {
         try #require(true)
     }
 
     @Testing.Test
-    func `#require with optional unwrapping compiles`() throws {
+    func requireWithOptionalUnwrappingCompiles() throws {
         let value: Int? = 42
         let unwrapped = try #require(value)
         #expect(unwrapped == 42)

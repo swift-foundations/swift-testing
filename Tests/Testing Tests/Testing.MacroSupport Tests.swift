@@ -13,7 +13,7 @@ extension Testing {
 
 extension Testing.MacroSupportTest.Unit {
     @Testing.Test
-    func `__TestID resolves to Test.ID`() {
+    func testIDResolvesToTestID() {
         let id = Testing.__TestID(
             module: "TestModule",
             name: "testFunc",
@@ -29,7 +29,7 @@ extension Testing.MacroSupportTest.Unit {
     }
 
     @Testing.Test
-    func `__TestSourceLocation resolves to Test.Source.Location`() {
+    func testSourceLocationResolvesToTestSourceLocation() {
         let location = Testing.__TestSourceLocation(
             fileID: "module/file.swift",
             filePath: "/path/to/file.swift",
@@ -41,15 +41,15 @@ extension Testing.MacroSupportTest.Unit {
     }
 
     @Testing.Test
-    func `__TestTrait resolves to Test.Trait`() {
-        let trait: Testing.__TestTrait = .enabled(true)
+    func testTraitResolvesToTestTrait() {
+        let trait: Testing.__TestTrait = .enabled(if: true)
         if case .enabled(true, _) = trait.kind {} else {
-            Issue.record("Expected .enabled(true) trait")
+            #expect(Bool(false), "Expected .enabled(true) trait")
         }
     }
 
     @Testing.Test
-    func `__TestBody resolves correctly`() {
+    func testBodyResolvesCorrectly() {
         let body: Testing.__TestBody = .sync {}
         // Body exists and was constructed successfully
         _ = body

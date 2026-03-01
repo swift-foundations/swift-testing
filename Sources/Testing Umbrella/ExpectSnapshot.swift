@@ -85,7 +85,7 @@ public func __expectSnapshot<Value: Sendable, Format: Sendable>(
     function: Swift.String = #function
 ) -> Test.Expectation {
     assertSnapshot(
-        of: value,
+        capturing: value,
         as: strategy,
         named: name,
         fileID: fileID,
@@ -109,7 +109,7 @@ public func __expectSnapshot<Value: Sendable, Format: Sendable>(
     function: Swift.String = #function
 ) async -> Test.Expectation {
     await assertSnapshot(
-        of: value,
+        capturing: value,
         as: strategy,
         named: name,
         fileID: fileID,

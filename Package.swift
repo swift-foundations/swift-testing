@@ -119,11 +119,24 @@ let package = Package(
                 "Testing Test Support",
             ]
         ),
+        // Macro expansion tests require __TestContentRecord type from Apple's
+        // swift-testing. Disabled until we bridge the test content infrastructure.
+        // .testTarget(
+        //     name: "Macro Expansion Tests",
+        //     dependencies: [
+        //         "Testing",
+        //         "Testing Test Support",
+        //         "Testing Macros Implementation",
+        //         .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+        //         .product(name: "SwiftSyntaxMacrosGenericTestSupport", package: "swift-syntax"),
+        //     ],
+        //     path: "Tests/Macro Expansion Tests"
+        // ),
     ],
     swiftLanguageModes: [.v6]
 )
 
-for target in package.targets where ![.system, .binary, .plugin, .macro].contains(target.type) {
+for target in package.targets where ![.system, .binary, .plugin, .macro, .test].contains(target.type) {
     let ecosystem: [SwiftSetting] = [
         .strictMemorySafety(),
         .enableUpcomingFeature("ExistentialAny"),

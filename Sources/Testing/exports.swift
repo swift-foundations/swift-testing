@@ -22,7 +22,11 @@
 @_exported public import Tests
 
 // Platform abstraction for discovery and I/O
-@_exported public import Kernel
+// Note: NOT @_exported — Kernel is an implementation detail of Testing Core.
+// Re-exporting Kernel would leak String_Primitives.String (via the
+// Kernel → Kernel_Primitives → String_Primitives @_exported chain),
+// which shadows Swift.String in SwiftPM's auto-generated test runner.
+internal import Kernel
 
 // Time primitives for Benchmark/Duration types
 @_exported public import Time_Primitives
