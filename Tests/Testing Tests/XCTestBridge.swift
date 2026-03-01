@@ -146,29 +146,29 @@ final class ReporterTests: XCTestCase {
 // MARK: - Test.Trait.Snapshot Tests
 
 final class TestTraitSnapshotTests: XCTestCase {
-    func testSnapshotTraitWithEachRecordingModeCreatesCorrectTrait() {
+    func testSnapshotWitnessKeyStoresRecordingMode() {
         Test_Primitives.Test.Trait.SnapshotTest.Unit()
-            .snapshotTraitWithEachRecordingModeCreatesCorrectTrait()
+            .snapshotWitnessKeyStoresRecordingMode()
     }
 
-    func testSnapshotRecordingExtractsRecordingModeFromSnapshotTrait() {
+    func testSnapshotRecordingExtractsFromCollection() {
         Test_Primitives.Test.Trait.SnapshotTest.Unit()
-            .snapshotRecordingExtractsRecordingModeFromSnapshotTrait()
+            .snapshotRecordingExtractsFromCollection()
     }
 
-    func testCollectionSnapshotRecordingFindsFirstSnapshotTrait() {
+    func testSnapshotRecordingOverwritesTakesLast() {
         Test_Primitives.Test.Trait.SnapshotTest.Unit()
-            .collectionSnapshotRecordingFindsFirstSnapshotTrait()
+            .snapshotRecordingOverwritesTakesLast()
     }
 
-    func testSnapshotRecordingReturnsNilForNonSnapshotTrait() {
+    func testSnapshotRecordingReturnsNilWhenNotSet() {
         Test_Primitives.Test.Trait.SnapshotTest.EdgeCase()
-            .snapshotRecordingReturnsNilForNonSnapshotTrait()
+            .snapshotRecordingReturnsNilWhenNotSet()
     }
 
-    func testCollectionSnapshotRecordingReturnsNilForEmptyArray() {
+    func testSnapshotRecordingClearsWhenSetToNil() {
         Test_Primitives.Test.Trait.SnapshotTest.EdgeCase()
-            .collectionSnapshotRecordingReturnsNilForEmptyArray()
+            .snapshotRecordingClearsWhenSetToNil()
     }
 }
 

@@ -14,27 +14,27 @@ extension Test_Primitives.Test.Trait {
 
 extension Test_Primitives.Test.Trait.SnapshotTest.Unit {
     @Testing.Test
-    func snapshotTraitWithEachRecordingModeCreatesCorrectTrait() {
+    func snapshotWitnessKeyStoresRecordingMode() {
         for mode in Test_Primitives.Test.Snapshot.Recording.allCases {
-            let trait = Test_Primitives.Test.Trait.snapshot(mode)
-            #expect(trait.snapshotRecording == mode)
+            var collection = Test_Primitives.Test.Trait.Collection()
+            collection.snapshotRecording = mode
+            #expect(collection.snapshotRecording == mode)
         }
     }
 
     @Testing.Test
-    func snapshotRecordingExtractsRecordingModeFromSnapshotTrait() {
-        let trait = Test_Primitives.Test.Trait.snapshot(.all)
-        #expect(trait.snapshotRecording == .all)
+    func snapshotRecordingExtractsFromCollection() {
+        var collection = Test_Primitives.Test.Trait.Collection()
+        collection.snapshotRecording = .all
+        #expect(collection.snapshotRecording == .all)
     }
 
     @Testing.Test
-    func collectionSnapshotRecordingFindsFirstSnapshotTrait() {
-        let traits: [Test_Primitives.Test.Trait] = [
-            .enabled(if: true),
-            .snapshot(.never),
-            .snapshot(.all),
-        ]
-        #expect(traits.snapshotRecording == .never)
+    func snapshotRecordingOverwritesTakesLast() {
+        var collection = Test_Primitives.Test.Trait.Collection()
+        collection.snapshotRecording = .never
+        collection.snapshotRecording = .all
+        #expect(collection.snapshotRecording == .all)
     }
 }
 
@@ -42,14 +42,16 @@ extension Test_Primitives.Test.Trait.SnapshotTest.Unit {
 
 extension Test_Primitives.Test.Trait.SnapshotTest.EdgeCase {
     @Testing.Test
-    func snapshotRecordingReturnsNilForNonSnapshotTrait() {
-        let trait = Test_Primitives.Test.Trait.enabled(if: true)
-        #expect(trait.snapshotRecording == nil)
+    func snapshotRecordingReturnsNilWhenNotSet() {
+        let collection = Test_Primitives.Test.Trait.Collection()
+        #expect(collection.snapshotRecording == nil)
     }
 
     @Testing.Test
-    func collectionSnapshotRecordingReturnsNilForEmptyArray() {
-        let traits: [Test_Primitives.Test.Trait] = []
-        #expect(traits.snapshotRecording == nil)
+    func snapshotRecordingClearsWhenSetToNil() {
+        var collection = Test_Primitives.Test.Trait.Collection()
+        collection.snapshotRecording = .all
+        collection.snapshotRecording = nil
+        #expect(collection.snapshotRecording == nil)
     }
 }
