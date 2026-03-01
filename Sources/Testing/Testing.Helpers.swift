@@ -98,20 +98,20 @@ extension Testing {
     ///
     /// - Parameters:
     ///   - id: Test identifier.
-    ///   - traits: Test traits.
+    ///   - modifiers: Modifiers for the trait collection.
     ///   - body: Test body.
     ///   - suiteID: Optional suite identifier.
     /// - Returns: Retained pointer to boxed registration.
     @inlinable
     public static func __createRegistration(
         id: Test.ID,
-        traits: [Test.Trait],
+        modifiers: [Test.Trait.Collection.Modifier],
         body: Test.Body,
         suiteID: Swift.String? = nil
     ) -> UnsafeRawPointer {
         let registration = Test.Registration(
             id: id,
-            traits: traits,
+            modifiers: modifiers,
             body: body,
             suiteID: suiteID
         )

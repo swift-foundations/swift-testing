@@ -44,7 +44,7 @@ extension Testing.MacroSupportTest.Unit {
     func testTraitResolvesToTestTrait() {
         let trait: Testing.__TestTrait = .enabled(if: true)
         if case .enabled(true, _) = trait.kind {} else {
-            #expect(Bool(false), "Expected .enabled(true) trait")
+            #expect(false, "Expected .enabled(true) trait")
         }
     }
 

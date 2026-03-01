@@ -69,53 +69,55 @@ public macro expectSnapshot<Value, Format>(
 
 // MARK: - Internal Implementation Bridge
 
-/// Internal bridge function called by the macro expansion.
-///
-/// This function is prefixed with `__` to indicate it should not be
-/// called directly by users.
-@discardableResult
-public func __expectSnapshot<Value: Sendable, Format: Sendable>(
-    _ value: Value,
-    as strategy: Test.Snapshot.Strategy<Value, Format>,
-    named name: Swift.String? = nil,
-    fileID: Swift.String = #fileID,
-    filePath: Swift.String = #filePath,
-    line: Int = #line,
-    column: Int = #column,
-    function: Swift.String = #function
-) -> Test.Expectation {
-    assertSnapshot(
-        capturing: value,
-        as: strategy,
-        named: name,
-        fileID: fileID,
-        filePath: filePath,
-        line: line,
-        column: column,
-        function: function
-    )
-}
+extension Testing {
+    /// Helper for #expectSnapshot macro expansion.
+    ///
+    /// Macros expand to calls to this function, which delegates to
+    /// the underlying `assertSnapshot()` from swift-tests.
+    @discardableResult
+    public static func __expectSnapshot<Value: Sendable, Format: Sendable>(
+        _ value: Value,
+        as strategy: Test.Snapshot.Strategy<Value, Format>,
+        named name: Swift.String? = nil,
+        fileID: Swift.String = #fileID,
+        filePath: Swift.String = #filePath,
+        line: Int = #line,
+        column: Int = #column,
+        function: Swift.String = #function
+    ) -> Test.Expectation {
+        assertSnapshot(
+            capturing: value,
+            as: strategy,
+            named: name,
+            fileID: fileID,
+            filePath: filePath,
+            line: line,
+            column: column,
+            function: function
+        )
+    }
 
-/// Async variant of the internal bridge function.
-@discardableResult
-public func __expectSnapshot<Value: Sendable, Format: Sendable>(
-    _ value: Value,
-    as strategy: Test.Snapshot.Strategy<Value, Format>,
-    named name: Swift.String? = nil,
-    fileID: Swift.String = #fileID,
-    filePath: Swift.String = #filePath,
-    line: Int = #line,
-    column: Int = #column,
-    function: Swift.String = #function
-) async -> Test.Expectation {
-    await assertSnapshot(
-        capturing: value,
-        as: strategy,
-        named: name,
-        fileID: fileID,
-        filePath: filePath,
-        line: line,
-        column: column,
-        function: function
-    )
+    /// Async variant of the #expectSnapshot macro expansion helper.
+    @discardableResult
+    public static func __expectSnapshot<Value: Sendable, Format: Sendable>(
+        _ value: Value,
+        as strategy: Test.Snapshot.Strategy<Value, Format>,
+        named name: Swift.String? = nil,
+        fileID: Swift.String = #fileID,
+        filePath: Swift.String = #filePath,
+        line: Int = #line,
+        column: Int = #column,
+        function: Swift.String = #function
+    ) async -> Test.Expectation {
+        await assertSnapshot(
+            capturing: value,
+            as: strategy,
+            named: name,
+            fileID: fileID,
+            filePath: filePath,
+            line: line,
+            column: column,
+            function: function
+        )
+    }
 }

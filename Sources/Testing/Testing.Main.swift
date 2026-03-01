@@ -113,7 +113,8 @@ extension Testing {
         }
 
         // Create and run the runner
-        let runner = Test.Runner(reporter: reporter)
+        var runner = Test.Runner(reporter: reporter)
+        runner.scopeProviders.append(.snapshot)
 
         // Execute tests in test mode context.
         // This ensures all dependencies resolve to testValue by default.

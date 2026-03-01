@@ -30,6 +30,7 @@
 /// - result: 41
 /// - expected: 42
 /// ```
+@discardableResult
 @freestanding(expression)
 public macro expect(
     _ condition: Bool,

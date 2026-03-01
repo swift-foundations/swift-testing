@@ -36,7 +36,7 @@
 /// - `.enabled(_:)`: Conditionally enable/disable
 /// - `.serialized`: Run serially (not in parallel)
 @attached(peer, names: prefixed(__swift_test_accessor_), prefixed(__swift_test_record_))
-public macro Test(_ traits: Test.Trait...) = #externalMacro(
+public macro Test(_ traits: Test.Trait.Collection.Modifier...) = #externalMacro(
     module: "Testing_Macros_Implementation",
     type: "TestMacro"
 )

@@ -28,7 +28,7 @@ extension Testing.Configuration.Test.Unit {
     func initCreatesDefaultConfigurationWithAutomaticConcurrency() {
         let config = Testing.Configuration()
         if case .automatic = config.concurrency {} else {
-            #expect(Bool(false), "Expected .automatic concurrency")
+            #expect(false, "Expected .automatic concurrency")
         }
     }
 
@@ -36,7 +36,7 @@ extension Testing.Configuration.Test.Unit {
     func initCreatesDefaultConfigurationWithConsoleOutputFormat() {
         let config = Testing.Configuration()
         if case .console = config.outputFormat {} else {
-            #expect(Bool(false), "Expected .console output format")
+            #expect(false, "Expected .console output format")
         }
     }
 
@@ -55,10 +55,10 @@ extension Testing.Configuration.Test.Unit {
         )
         #expect(config.filter == "MyTest")
         if case .serial = config.concurrency {} else {
-            #expect(Bool(false), "Expected .serial concurrency")
+            #expect(false, "Expected .serial concurrency")
         }
         if case .json = config.outputFormat {} else {
-            #expect(Bool(false), "Expected .json output format")
+            #expect(false, "Expected .json output format")
         }
     }
 }

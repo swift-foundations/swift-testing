@@ -102,7 +102,7 @@ public struct TestMacro: PeerMacro {
                             column: 1
                         )
                     ),
-                    traits: \(raw: traits),
+                    modifiers: \(raw: traits),
                     body: Testing.__TestBody\(raw: bodyWrapper),
                     suiteID: nil
                 )

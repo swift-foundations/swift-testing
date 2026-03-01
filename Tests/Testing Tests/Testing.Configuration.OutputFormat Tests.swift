@@ -19,12 +19,12 @@ extension Testing.Configuration.OutputFormat.Test.Unit {
         var config = Testing.Configuration()
         config.outputFormat = console
         if case .json = config.outputFormat {
-            #expect(Bool(false), "Console should not match json")
+            #expect(false, "Console should not match json")
         }
 
         config.outputFormat = json
         if case .console = config.outputFormat {
-            #expect(Bool(false), "JSON should not match console")
+            #expect(false, "JSON should not match console")
         }
     }
 }

@@ -61,7 +61,7 @@ public struct SuiteMacro: MemberMacro, MemberAttributeMacro {
                             column: 1
                         )
                     ),
-                    traits: \(raw: traits)
+                    modifiers: \(raw: traits)
                 )
                 let boxed = Testing.Box(registration)
                 let ptr = Unmanaged.passRetained(boxed).toOpaque()

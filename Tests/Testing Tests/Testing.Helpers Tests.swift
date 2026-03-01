@@ -45,11 +45,10 @@ extension Testing.HelpersTest.EdgeCase {
     func requireWithFalseThrows() {
         do {
             try Testing.__require(false)
-            #expect(Bool(false), "Expected __require(false) to throw")
-        } catch is Test_Primitives.Test.Requirement.Failed {
-            // Expected
+            #expect(false, "Expected __require(false) to throw")
         } catch {
-            #expect(Bool(false), "Unexpected error type: \(error)")
+            // Typed throws guarantees error: Test.Requirement.Failed
+            _ = error
         }
     }
 
@@ -57,12 +56,11 @@ extension Testing.HelpersTest.EdgeCase {
     func requireWithNilOptionalThrows() {
         let value: Int? = nil
         do {
-            try Testing.__require(value)
-            #expect(Bool(false), "Expected __require(nil) to throw")
-        } catch is Test_Primitives.Test.Requirement.Failed {
-            // Expected
+            _ = try Testing.__require(value)
+            #expect(false, "Expected __require(nil) to throw")
         } catch {
-            #expect(Bool(false), "Unexpected error type: \(error)")
+            // Typed throws guarantees error: Test.Requirement.Failed
+            _ = error
         }
     }
 }

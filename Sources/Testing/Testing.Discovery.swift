@@ -108,7 +108,7 @@ extension Testing {
                 let boxed = unsafe Unmanaged<Test.Box<Test.Registration>>.fromOpaque(ptr).takeRetainedValue()
                 let reg = boxed.value
 
-                registry.add(id: reg.id, traits: reg.traits, body: reg.body)
+                registry.add(id: reg.id, modifiers: reg.modifiers, body: reg.body)
             }
         }
 
@@ -140,7 +140,7 @@ extension Testing {
                 let boxed = unsafe Unmanaged<Test.Box<Test.Registration>>.fromOpaque(boxedPtr).takeRetainedValue()
                 let reg = boxed.value
 
-                registry.add(id: reg.id, traits: reg.traits, body: reg.body)
+                registry.add(id: reg.id, modifiers: reg.modifiers, body: reg.body)
             }
 
             return registry

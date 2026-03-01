@@ -143,35 +143,6 @@ final class ReporterTests: XCTestCase {
     }
 }
 
-// MARK: - Test.Trait.Snapshot Tests
-
-final class TestTraitSnapshotTests: XCTestCase {
-    func testSnapshotWitnessKeyStoresRecordingMode() {
-        Test_Primitives.Test.Trait.SnapshotTest.Unit()
-            .snapshotWitnessKeyStoresRecordingMode()
-    }
-
-    func testSnapshotRecordingExtractsFromCollection() {
-        Test_Primitives.Test.Trait.SnapshotTest.Unit()
-            .snapshotRecordingExtractsFromCollection()
-    }
-
-    func testSnapshotRecordingOverwritesTakesLast() {
-        Test_Primitives.Test.Trait.SnapshotTest.Unit()
-            .snapshotRecordingOverwritesTakesLast()
-    }
-
-    func testSnapshotRecordingReturnsNilWhenNotSet() {
-        Test_Primitives.Test.Trait.SnapshotTest.EdgeCase()
-            .snapshotRecordingReturnsNilWhenNotSet()
-    }
-
-    func testSnapshotRecordingClearsWhenSetToNil() {
-        Test_Primitives.Test.Trait.SnapshotTest.EdgeCase()
-            .snapshotRecordingClearsWhenSetToNil()
-    }
-}
-
 // MARK: - Macro Compilation Tests
 
 final class MacroCompilationXCTests: XCTestCase {

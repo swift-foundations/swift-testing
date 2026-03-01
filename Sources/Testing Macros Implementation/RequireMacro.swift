@@ -47,7 +47,7 @@ public struct RequireMacro: ExpressionMacro {
         // The expansion works for both Bool and Optional types
         // The overloaded __require functions handle the difference
         return """
-            try Testing.__require(
+            Testing.__require(
                 \(firstArg),
                 \(raw: comment),
                 fileID: #fileID,
