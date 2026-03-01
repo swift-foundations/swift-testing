@@ -135,7 +135,21 @@ public struct TestMacro: PeerMacro {
             )
             """
 
-        return [accessor, record]
+        // 3. Generate legacy container enum for pre-6.3 discovery.
+        // The compiler always places type metadata in __swift5_types, so
+        // discovery can find this enum by scanning for types named __🟡$...
+        // and casting to __TestContentRecordContainer.
+        let containerName = context.makeUniqueName("__🟡$_\(normalizedName)")
+        let container: DeclSyntax = """
+            #if compiler(<6.3)
+            @available(*, deprecated, message: "This type is an implementation detail of the testing library. Do not use it directly.")
+            private enum \(containerName): Testing.__TestContentRecordContainer {
+                nonisolated static let __testContentRecord: Testing.__TestContentRecord = \(recordName)
+            }
+            #endif
+            """
+
+        return [accessor, record, container]
     }
 
     private static func extractTraits(from node: AttributeSyntax) -> String {

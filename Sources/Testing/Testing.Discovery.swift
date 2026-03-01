@@ -112,6 +112,56 @@ extension Testing {
             }
         }
 
+        // MARK: - Legacy: Type Metadata-Based Discovery
+
+        /// Discovers tests from type metadata (legacy, Swift < 6.3).
+        ///
+        /// Scans `__swift5_types` for enum types named `__🟡$...` that conform to
+        /// `__TestContentRecordContainer`. Each matching type's
+        /// `__testContentRecord` property provides a test content record tuple.
+        ///
+        /// - Returns: A registry containing all discovered tests.
+        public static func discoverFromTypeMetadata() -> Test.Plan.Registry {
+            var registry = Test.Plan.Registry()
+
+            let types = Loader.types(named: "__🟡$")
+
+            for type in types {
+                guard let container = type as? any Test.__TestContentRecordContainer.Type else {
+                    continue
+                }
+
+                let record = unsafe container.__testContentRecord
+
+                guard unsafe record.kind == Test.__TestContentKind.test.rawValue else {
+                    continue
+                }
+
+                guard let accessor = unsafe record.accessor else {
+                    continue
+                }
+
+                var registrationPtr: UnsafeRawPointer? = nil
+                let success = unsafe accessor(
+                    &registrationPtr,
+                    UnsafeRawPointer(bitPattern: 1)!,
+                    UnsafeRawPointer?(nil),
+                    0
+                )
+
+                guard success, let ptr = unsafe registrationPtr else {
+                    continue
+                }
+
+                let boxed = unsafe Unmanaged<Test.Box<Test.Registration>>.fromOpaque(ptr).takeRetainedValue()
+                let reg = boxed.value
+
+                registry.add(id: reg.id, modifiers: reg.modifiers, body: reg.body)
+            }
+
+            return registry
+        }
+
         // MARK: - Fallback: Symbol-Based Discovery
 
         /// Factory function signature for dlsym-based discovery.
@@ -173,10 +223,15 @@ extension Testing {
         public static func discoverAll(
             fallbackFactoryNames: [Swift.String] = []
         ) -> Test.Plan.Registry {
-            // Try section-based discovery first
+            // Try section-based discovery first (Swift 6.3+)
             var registry = discoverFromSections()
 
-            // If no tests found and we have fallback names, try dlsym
+            // Fall back to type-metadata discovery (Swift < 6.3)
+            if registry.isEmpty {
+                registry = discoverFromTypeMetadata()
+            }
+
+            // Final fallback: dlsym-based discovery
             if registry.isEmpty && !fallbackFactoryNames.isEmpty {
                 registry = discover(factoryNames: fallbackFactoryNames)
             }
@@ -189,11 +244,7 @@ extension Testing {
 // MARK: - Registry isEmpty Check
 
 extension Test.Plan.Registry {
-    /// Returns true if the registry has no entries.
     fileprivate var isEmpty: Bool {
-        // We need to check if there are any entries
-        // Since Registry is ~Copyable, we can't easily inspect it
-        // For now, assume section discovery worked if it returns
-        return false
+        count == 0
     }
 }

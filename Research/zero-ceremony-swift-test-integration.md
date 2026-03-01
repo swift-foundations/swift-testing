@@ -218,11 +218,11 @@ This is not a bug in our implementation — it's a toolchain limitation. Apple's
 
 ## Outcome
 
-**Status**: DECISION
+**Status**: IMPLEMENTED
 
-**Decision**: Section-based discovery via `@section`/`@used` is the one correct mechanism. It requires Swift 6.3+. No workarounds should be built for 6.2.
+**Decision**: Two-tier discovery: section-based (Swift 6.3+) as the principled long-term mechanism, with legacy type-metadata discovery (Swift 6.2) as a zero-cost bridge.
 
-### The Correct Architecture
+### The Correct Architecture (Swift 6.3+)
 
 Section-based discovery is the principled solution because:
 
@@ -236,22 +236,50 @@ When Swift 6.3 is available:
 1. Update the `@Test` macro to use `@section`/`@used` (non-underscored, stable) gated by `#if compiler(>=6.3)`
 2. Adopt Apple's `#if objectFormat()` pattern for cross-platform section names (MachO, ELF, COFF, Wasm)
 3. Remove the dead `#if hasFeature(SymbolLinkageMarkers)` / `@_section` / `@_used` code — it was never functional
-4. Consider a custom section name (e.g., `__inst_tests`) to avoid collision with Apple's records
+4. The `#if compiler(<6.3)` container enums automatically stop being emitted — no code changes needed
 
-### Swift 6.2 Status
+### Legacy Discovery (Swift 6.2)
 
-On Swift 6.2, section-based discovery is impossible. The XCTest bridge (`Testing.XCTestBridge.swift`) exists as a temporary stopgap but `Testing.runAll()` will find 0 tests because section records are never placed. This is expected and not a bug.
+Apple's swift-testing has a legacy discovery mechanism that piggybacks on the `__swift5_types` section (type metadata), which the compiler always populates for every Swift type. We adopted this same approach.
 
-The `#if hasFeature(SymbolLinkageMarkers)` guard in the macro evaluates to `false` → section attributes are never emitted → records are never placed → discovery finds nothing. This is safe — no crash risk, no misformatted records.
+**How it works**:
 
-### What NOT to Build
+1. The `@Test` macro emits (in addition to the accessor + record) a container enum gated behind `#if compiler(<6.3)`:
 
-- No registry-based fallback mechanisms
-- No `@_cdecl` factory functions with dlsym lookup
-- No `Test.Manifest.register()` calls from the macro
-- No module-level initialization hooks
+```swift
+#if compiler(<6.3)
+private enum __🟡$_myTest: Testing.__TestContentRecordContainer {
+    nonisolated static var __testContentRecord: Testing.__TestContentRecord {
+        unsafe record_myTest
+    }
+}
+#endif
+```
 
-These would be workarounds for a toolchain limitation with a known ship date. They add maintenance burden, diverge from Apple's approach, and become dead code the moment 6.3 arrives.
+2. The compiler places this enum's type metadata in `__swift5_types` (always, for every type)
+
+3. At runtime, `Loader.types(named: "__🟡$")` walks `__swift5_types` via C++ ABI code (ported from Apple's `_TestingInternals/Discovery.cpp`), filtering by name substring
+
+4. Matching types are cast to `Test.__TestContentRecordContainer`, their `__testContentRecord` property is read, and the accessor is called to produce a `Test.Registration`
+
+5. `Testing.Discovery.discoverAll()` tries section-based first, falls back to type-metadata, then dlsym
+
+**Key attribute**: `@_alwaysEmitConformanceMetadata` on the protocol ensures the optimizer doesn't strip conformance info.
+
+**Implementation files**:
+
+| File | Package | Purpose |
+|------|---------|---------|
+| `CTypeMetadata/TypeMetadata.cpp` | swift-loader | C++ ABI scanner (port of Apple's Discovery.cpp) |
+| `CTypeMetadata/include/CTypeMetadata.h` | swift-loader | C header for Swift interop |
+| `Loader/Loader.TypeMetadata.swift` | swift-loader | `Loader.types(named:)` Swift wrapper |
+| `Tests Core/Test.Discovery.Legacy.swift` | swift-tests | `__TestContentRecordContainer` protocol |
+| `Testing/Testing.MacroSupport.swift` | swift-testing | Typealias for macro expansions |
+| `Testing/Testing.Discovery.swift` | swift-testing | `discoverFromTypeMetadata()` + updated `discoverAll()` |
+| `Testing Macros Implementation/TestMacro.swift` | swift-testing | Container enum emission |
+| `Testing Macros Implementation/SuiteMacro.swift` | swift-testing | Container enum emission |
+
+**Self-removing**: When Swift 6.3 arrives, `#if compiler(<6.3)` evaluates to false. The container enums stop being emitted. Section-based discovery finds records. The legacy path in `discoverAll()` returns an empty registry (no `__🟡$` types exist). No code changes needed.
 
 ## References
 
