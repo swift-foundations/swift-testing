@@ -125,4 +125,3 @@ extension Testing {
         return result.hasFailures
     }
 }
-

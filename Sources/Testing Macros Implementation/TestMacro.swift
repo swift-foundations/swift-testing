@@ -127,7 +127,7 @@ public struct TestMacro: PeerMacro {
             #endif
             @available(*, deprecated, message: "This is an implementation detail of the testing library. Do not use it directly.")
             private \(raw: staticKeyword)nonisolated let \(recordName): Testing.__TestContentRecord = (
-                0x74657374,
+                Testing.__TestContentKind.test.rawValue,
                 0,
                 unsafe \(accessorName),
                 0,

@@ -38,6 +38,9 @@ extension Testing {
     /// Unambiguous reference to Test.__TestContentRecordAccessor for macro expansions.
     public typealias __TestContentRecordAccessor = Test.__TestContentRecordAccessor
 
+    /// Unambiguous reference to Test.__TestContentKind for macro expansions.
+    public typealias __TestContentKind = Test.__TestContentKind
+
     /// Unambiguous reference to Test.Registration for macro expansions.
     public typealias Registration = Test.Registration
 
