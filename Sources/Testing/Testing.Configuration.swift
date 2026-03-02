@@ -26,7 +26,7 @@ extension Testing {
         public var filter: Swift.String?
 
         /// Filter tests by tags.
-        public var tags: Set<Swift.String>?
+        public var tags: Swift.Set<Swift.String>?
 
         /// Concurrency mode for test execution.
         public var concurrency: Test.Runner.Concurrency
@@ -58,7 +58,7 @@ extension Testing {
                 let tags = tagsString.split(separator: ",").map { tag in
                     Swift.String(tag.drop(while: \.isWhitespace))
                 }
-                config.tags = Set(tags)
+                config.tags = Swift.Set(tags)
             }
 
             if let parallelString = Environment.read("SWIFT_TEST_PARALLEL") {

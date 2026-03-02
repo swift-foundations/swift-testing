@@ -11,7 +11,7 @@ extension Testing.Configuration {
     /// ```
     public static func stub(
         filter: Swift.String? = nil,
-        tags: Set<Swift.String>? = nil,
+        tags: Swift.Set<Swift.String>? = nil,
         concurrency: Test_Primitives.Test.Runner.Concurrency = .serial,
         outputFormat: OutputFormat = .console,
         outputPath: Swift.String? = nil
