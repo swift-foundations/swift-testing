@@ -21,7 +21,10 @@ extension Testing.HelpersTest.Unit {
 
     @Testing.Test
     func expectWithFalseReturnsFailingExpectation() {
-        let expectation = Testing.__expect(false)
+        let collector = Test.Expectation.Collector()
+        let expectation = Test.Expectation.Collector.$current.withValue(collector) {
+            Testing.__expect(false)
+        }
         #expect(expectation.isFailing)
     }
 
@@ -43,8 +46,11 @@ extension Testing.HelpersTest.Unit {
 extension Testing.HelpersTest.EdgeCase {
     @Testing.Test
     func requireWithFalseThrows() {
+        let collector = Test.Expectation.Collector()
         do {
-            try Testing.__require(false)
+            try Test.Expectation.Collector.$current.withValue(collector) {
+                try Testing.__require(false)
+            }
             #expect(false, "Expected __require(false) to throw")
         } catch {
             // Typed throws guarantees error: Test.Requirement.Failed
@@ -55,8 +61,11 @@ extension Testing.HelpersTest.EdgeCase {
     @Testing.Test
     func requireWithNilOptionalThrows() {
         let value: Int? = nil
+        let collector = Test.Expectation.Collector()
         do {
-            _ = try Testing.__require(value)
+            _ = try Test.Expectation.Collector.$current.withValue(collector) {
+                try Testing.__require(value)
+            }
             #expect(false, "Expected __require(nil) to throw")
         } catch {
             // Typed throws guarantees error: Test.Requirement.Failed
