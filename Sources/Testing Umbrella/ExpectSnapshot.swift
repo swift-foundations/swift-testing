@@ -61,7 +61,8 @@
 public macro expectSnapshot<Value, Format>(
     _ value: Value,
     as strategy: Test.Snapshot.Strategy<Value, Format>,
-    named name: Swift.String? = nil
+    named name: Swift.String? = nil,
+    redacting redactions: [Test.Snapshot.Redaction<Format>] = []
 ) -> Test.Expectation = #externalMacro(
     module: "Testing_Macros_Implementation",
     type: "ExpectSnapshotMacro"
@@ -79,6 +80,7 @@ extension Testing {
         _ value: Value,
         as strategy: Test.Snapshot.Strategy<Value, Format>,
         named name: Swift.String? = nil,
+        redacting redactions: [Test.Snapshot.Redaction<Format>] = [],
         fileID: Swift.String = #fileID,
         filePath: Swift.String = #filePath,
         line: Int = #line,
@@ -89,6 +91,7 @@ extension Testing {
             capturing: value,
             as: strategy,
             named: name,
+            redacting: redactions,
             fileID: fileID,
             filePath: filePath,
             line: line,
@@ -103,6 +106,7 @@ extension Testing {
         _ value: Value,
         as strategy: Test.Snapshot.Strategy<Value, Format>,
         named name: Swift.String? = nil,
+        redacting redactions: [Test.Snapshot.Redaction<Format>] = [],
         fileID: Swift.String = #fileID,
         filePath: Swift.String = #filePath,
         line: Int = #line,
@@ -113,6 +117,7 @@ extension Testing {
             capturing: value,
             as: strategy,
             named: name,
+            redacting: redactions,
             fileID: fileID,
             filePath: filePath,
             line: line,

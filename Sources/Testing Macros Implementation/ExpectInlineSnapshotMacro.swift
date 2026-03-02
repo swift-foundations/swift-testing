@@ -56,6 +56,7 @@ public struct ExpectInlineSnapshotMacro: ExpressionMacro {
         // Parse arguments
         var valueExpr: ExprSyntax?
         var strategyExpr: ExprSyntax?
+        var redactingExpr: Swift.String = "[]"
 
         for argument in node.arguments {
             let label = argument.label?.text
@@ -69,6 +70,8 @@ public struct ExpectInlineSnapshotMacro: ExpressionMacro {
                 }
             case "as":
                 strategyExpr = expr
+            case "redacting":
+                redactingExpr = expr.description
             case "matches":
                 // Ignore — we handle this via trailing closure
                 break
@@ -97,6 +100,7 @@ public struct ExpectInlineSnapshotMacro: ExpressionMacro {
             Testing.__expectInlineSnapshot(
                 \(value),
                 as: \(strategy),
+                redacting: \(raw: redactingExpr),
                 matches: \(raw: matchesExpr),
                 fileID: #fileID,
                 filePath: #filePath,

@@ -2,7 +2,7 @@
 //
 // This source file is part of the swift-testing open source project
 //
-// Copyright (c) 2024-2025 Coen ten Thije Boonkkamp and the swift-testing project authors
+// Copyright (c) 2024-2026 Coen ten Thije Boonkkamp and the swift-testing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE for license information
@@ -12,40 +12,17 @@
 import SwiftSyntax
 import SwiftSyntaxMacros
 
-/// Implementation of the #expectSnapshot macro.
+/// Implementation of the #expectFacetedSnapshot macro.
 ///
-/// Captures the snapshotted expression and evaluates it against a reference.
-///
-/// ## Example
-///
-/// ```swift
-/// #expectSnapshot(user.description, as: .lines)
-/// ```
-///
-/// Expands to:
-///
-/// ```swift
-/// Testing.__expectSnapshot(
-///     user.description,
-///     as: .lines,
-///     named: nil,
-///     fileID: #fileID,
-///     filePath: #filePath,
-///     line: #line,
-///     column: #column,
-///     function: #function
-/// )
-/// ```
-public struct ExpectSnapshotMacro: ExpressionMacro {
+/// Expands to a call to `Testing.__expectFacetedSnapshot(...)`.
+public struct ExpectFacetedSnapshotMacro: ExpressionMacro {
     public static func expansion(
         of node: some FreestandingMacroExpansionSyntax,
         in context: some MacroExpansionContext
     ) throws -> ExprSyntax {
-        // Parse arguments
         var valueExpr: ExprSyntax?
-        var strategyExpr: ExprSyntax?
+        var facetedExpr: ExprSyntax?
         var nameExpr: String = "nil"
-        var redactingExpr: String = "[]"
 
         for argument in node.arguments {
             let label = argument.label?.text
@@ -53,35 +30,31 @@ public struct ExpectSnapshotMacro: ExpressionMacro {
 
             switch label {
             case nil:
-                // First unlabeled argument is the value
                 if valueExpr == nil {
                     valueExpr = expr
                 }
             case "as":
-                strategyExpr = expr
+                facetedExpr = expr
             case "named":
                 nameExpr = expr.description
-            case "redacting":
-                redactingExpr = expr.description
             default:
                 break
             }
         }
 
         guard let value = valueExpr else {
-            throw ExpectSnapshotMacroError.missingValue
+            throw ExpectFacetedSnapshotMacroError.missingValue
         }
 
-        guard let strategy = strategyExpr else {
-            throw ExpectSnapshotMacroError.missingStrategy
+        guard let faceted = facetedExpr else {
+            throw ExpectFacetedSnapshotMacroError.missingFaceted
         }
 
         return """
-            Testing.__expectSnapshot(
+            Testing.__expectFacetedSnapshot(
                 \(value),
-                as: \(strategy),
+                as: \(faceted),
                 named: \(raw: nameExpr),
-                redacting: \(raw: redactingExpr),
                 fileID: #fileID,
                 filePath: #filePath,
                 line: #line,
@@ -92,16 +65,16 @@ public struct ExpectSnapshotMacro: ExpressionMacro {
     }
 }
 
-enum ExpectSnapshotMacroError: Error, CustomStringConvertible {
+enum ExpectFacetedSnapshotMacroError: Error, CustomStringConvertible {
     case missingValue
-    case missingStrategy
+    case missingFaceted
 
     var description: String {
         switch self {
         case .missingValue:
-            return "#expectSnapshot requires a value to snapshot"
-        case .missingStrategy:
-            return "#expectSnapshot requires a strategy (as: .lines, .text, .json, etc.)"
+            return "#expectFacetedSnapshot requires a value to snapshot"
+        case .missingFaceted:
+            return "#expectFacetedSnapshot requires a faceted configuration (as: ...)"
         }
     }
 }

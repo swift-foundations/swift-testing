@@ -54,6 +54,7 @@
 public macro expectInlineSnapshot<Value>(
     _ value: Value,
     as strategy: Test.Snapshot.Strategy<Value, Swift.String>,
+    redacting redactions: [Test.Snapshot.Redaction<Swift.String>] = [],
     matches expected: (() -> Swift.String)? = nil
 ) -> Test.Expectation = #externalMacro(
     module: "Testing_Macros_Implementation",
@@ -71,6 +72,7 @@ extension Testing {
     public static func __expectInlineSnapshot<Value: Sendable>(
         _ value: Value,
         as strategy: Test.Snapshot.Strategy<Value, Swift.String>,
+        redacting redactions: [Test.Snapshot.Redaction<Swift.String>] = [],
         matches expected: (() -> Swift.String)? = nil,
         fileID: Swift.String = #fileID,
         filePath: Swift.String = #filePath,
@@ -81,6 +83,7 @@ extension Testing {
         assertInlineSnapshot(
             of: value,
             as: strategy,
+            redacting: redactions,
             matches: expected,
             fileID: fileID,
             filePath: filePath,
@@ -95,6 +98,7 @@ extension Testing {
     public static func __expectInlineSnapshot<Value: Sendable>(
         _ value: Value,
         as strategy: Test.Snapshot.Strategy<Value, Swift.String>,
+        redacting redactions: [Test.Snapshot.Redaction<Swift.String>] = [],
         matches expected: (() -> Swift.String)? = nil,
         fileID: Swift.String = #fileID,
         filePath: Swift.String = #filePath,
@@ -105,6 +109,7 @@ extension Testing {
         await assertInlineSnapshot(
             of: value,
             as: strategy,
+            redacting: redactions,
             matches: expected,
             fileID: fileID,
             filePath: filePath,
