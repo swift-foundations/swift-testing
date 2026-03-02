@@ -28,6 +28,10 @@ public struct TestMacro: PeerMacro {
         }
 
         let funcName = funcDecl.name.text
+        // Use trimmedDescription — preserves backtick escaping for identifiers with spaces
+        // (TokenSyntax interpolation into ExprSyntax drops backtick identifiers silently)
+        let funcRef = funcDecl.name.trimmedDescription
+
 
         // Normalize function name for use in generated identifiers
         // (backtick names may contain spaces)
@@ -50,36 +54,43 @@ public struct TestMacro: PeerMacro {
         let tryKeyword = isThrows ? "try " : ""
 
         // Determine if inside a type declaration (Suite) or extension
-        let typeName: String? = context.lexicalContext.first.flatMap { syntax -> String? in
+        // Extract both the ref (for code generation) and the name (for display).
+        // Use trimmedDescription (not TokenSyntax) to preserve backtick escaping.
+        let typeInfo: (ref: String, name: String)? = context.lexicalContext.first.flatMap { syntax in
             if let structDecl = syntax.as(StructDeclSyntax.self) {
-                return structDecl.name.text
+                return (structDecl.name.trimmedDescription, structDecl.name.text)
             } else if let classDecl = syntax.as(ClassDeclSyntax.self) {
-                return classDecl.name.text
+                return (classDecl.name.trimmedDescription, classDecl.name.text)
             } else if let enumDecl = syntax.as(EnumDeclSyntax.self) {
-                return enumDecl.name.text
+                return (enumDecl.name.trimmedDescription, enumDecl.name.text)
             } else if let extDecl = syntax.as(ExtensionDeclSyntax.self) {
-                // For extensions, extract the extended type name
-                return extDecl.extendedType.trimmedDescription
+                let text = extDecl.extendedType.trimmedDescription
+                return (text, text)
             }
             return nil
         }
-        let suiteExpr = typeName.map { "\"\($0)\"" } ?? "nil"
+        let suiteExpr = typeInfo.map { "\"\($0.name)\"" } ?? "nil"
 
         // When inside a type, declarations need to be static
-        let staticKeyword = typeName != nil ? "static " : ""
+        let staticKeyword = typeInfo != nil ? "static " : ""
 
-        // Build the body wrapper - for instance methods, we need to instantiate the type
-        let bodyWrapper: String
-        if let typeName = typeName {
-            // Instance method inside a type - create instance and call method
+        // Build the body expression using raw interpolation for both type and function names.
+        // TokenSyntax interpolation into ExprSyntax silently drops backtick-escaped
+        // identifiers with spaces; trimmedDescription preserves them correctly.
+        let bodyExpr: ExprSyntax
+        if let typeInfo = typeInfo {
+            let typeRef = typeInfo.ref
             if isAsync {
-                bodyWrapper = ".async { let instance = \(typeName)(); \(tryKeyword)await instance.\(funcName)() }"
+                bodyExpr = "Testing.__TestBody.async { let instance = \(raw: typeRef)(); \(raw: tryKeyword)await instance.\(raw: funcRef)() }"
             } else {
-                bodyWrapper = ".sync { let instance = \(typeName)(); \(tryKeyword)instance.\(funcName)() }"
+                bodyExpr = "Testing.__TestBody.sync { let instance = \(raw: typeRef)(); \(raw: tryKeyword)instance.\(raw: funcRef)() }"
             }
         } else {
-            // Free function at module scope
-            bodyWrapper = isAsync ? ".async { \(tryKeyword)await \(funcName)() }" : ".sync { \(tryKeyword)\(funcName)() }"
+            if isAsync {
+                bodyExpr = "Testing.__TestBody.async { \(raw: tryKeyword)await \(raw: funcRef)() }"
+            } else {
+                bodyExpr = "Testing.__TestBody.sync { \(raw: tryKeyword)\(raw: funcRef)() }"
+            }
         }
 
         // 1. Generate the accessor as a nonisolated let with a closure
@@ -103,7 +114,7 @@ public struct TestMacro: PeerMacro {
                         )
                     ),
                     modifiers: \(raw: traits),
-                    body: Testing.__TestBody\(raw: bodyWrapper),
+                    body: \(bodyExpr),
                     suiteID: nil
                 )
                 let boxed = Testing.Box(registration)

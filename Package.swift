@@ -45,7 +45,7 @@ let package = Package(
         // Witness system (mode context for test/live execution)
         .package(path: "../swift-witnesses"),
         // Macro implementation
-        .package(url: "https://github.com/swiftlang/swift-syntax", "600.0.0"..<"603.0.0")
+        .package(url: "https://github.com/swiftlang/swift-syntax", "602.0.0"..<"603.0.0")
     ],
     targets: [
         // UMBRELLA TARGET - what users import as "Testing"
