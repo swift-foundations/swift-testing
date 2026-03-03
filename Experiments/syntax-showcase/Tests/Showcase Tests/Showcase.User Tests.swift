@@ -94,7 +94,7 @@ extension Showcase.User.Test.Performance {
     }
 }
 
-// MARK: - Snapshot Tests (via #expectSnapshot macro)
+// MARK: - Snapshot Tests (via #snapshot macro)
 
 extension Showcase.User.Test.Snapshot {
 
@@ -103,7 +103,7 @@ extension Showcase.User.Test.Snapshot {
     func user_description_format() {
         let user = Showcase.User(name: "Alice", email: "alice@example.com", role: .admin)
 
-        #expectSnapshot(user.description, as: .lines)
+        #snapshot(user.description, as: .lines)
     }
 
     // Named snapshots: multiple assertions in one test
@@ -113,9 +113,9 @@ extension Showcase.User.Test.Snapshot {
         let member = Showcase.User(name: "Bob", email: "b@example.com", role: .member)
         let guest = Showcase.User(name: "Carol", email: "c@example.com", role: .guest)
 
-        #expectSnapshot(admin.description, as: .lines, named: "admin")
-        #expectSnapshot(member.description, as: .lines, named: "member")
-        #expectSnapshot(guest.description, as: .lines, named: "guest")
+        #snapshot(admin.description, as: .lines, named: "admin")
+        #snapshot(member.description, as: .lines, named: "member")
+        #snapshot(guest.description, as: .lines, named: "guest")
     }
 
     // Inline snapshots: expected value embedded directly in source
@@ -148,6 +148,6 @@ extension Showcase.User.Test.Snapshot {
             }
 
         let user = Showcase.User(name: "Alice", email: "alice@example.com", role: .admin)
-        #expectSnapshot(user, as: strategy)
+        #snapshot(user, as: strategy)
     }
 }

@@ -98,7 +98,7 @@ extension Showcase.Parser.Test.Snapshot {
 
         let tokens = Showcase.Parser().parse("the quick brown fox")
 
-        #expectSnapshot(tokens, as: strategy)
+        #snapshot(tokens, as: strategy)
     }
 
     // Named snapshots for different input classes
@@ -111,8 +111,8 @@ extension Showcase.Parser.Test.Snapshot {
             return tokens.map(\.value).joined(separator: " | ")
         }
 
-        #expectSnapshot(format("hello world"), as: .lines, named: "simple")
-        #expectSnapshot(format("a b c d e"), as: .lines, named: "many_tokens")
-        #expectSnapshot(format("single"), as: .lines, named: "single_token")
+        #snapshot(format("hello world"), as: .lines, named: "simple")
+        #snapshot(format("a b c d e"), as: .lines, named: "many_tokens")
+        #snapshot(format("single"), as: .lines, named: "single_token")
     }
 }

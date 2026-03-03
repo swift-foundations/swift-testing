@@ -91,16 +91,17 @@ extension MacroExpansionTests.Unit {
     }
 
     @Testing.Test
-    func `expectSnapshot macro expands to __expectSnapshot call`() throws {
+    func `snapshot macro without named expands to __snapshotInline`() throws {
         try assertMacroExpansion(
             """
-            #expectSnapshot(output, as: .lines)
+            #snapshot(output, as: .lines)
             """,
             expandedSource: """
-            Testing.__expectSnapshot(
+            Testing.__snapshotInline(
                 output,
                 as: .lines,
-                named: nil,
+                redacting: [],
+                matches: nil,
                 fileID: #fileID,
                 filePath: #filePath,
                 line: #line,
@@ -108,7 +109,50 @@ extension MacroExpansionTests.Unit {
                 function: #function
             )
             """,
-            macros: ["expectSnapshot": ExpectSnapshotMacro.self]
+            macros: ["snapshot": SnapshotMacro.self]
+        )
+    }
+
+    @Testing.Test
+    func `snapshot macro with named expands to __snapshotFile`() throws {
+        try assertMacroExpansion(
+            """
+            #snapshot(output, as: .lines, named: "baseline")
+            """,
+            expandedSource: """
+            Testing.__snapshotFile(
+                output,
+                as: .lines,
+                named: "baseline",
+                redacting: [],
+                fileID: #fileID,
+                filePath: #filePath,
+                line: #line,
+                column: #column,
+                function: #function
+            )
+            """,
+            macros: ["snapshot": SnapshotMacro.self]
+        )
+    }
+
+    @Testing.Test
+    func `snapshot macro with named and trailing closure produces error`() throws {
+        try assertMacroExpansion(
+            """
+            #snapshot(output, as: .lines, named: "x") { "expected" }
+            """,
+            expandedSource: """
+            #snapshot(output, as: .lines, named: "x") { "expected" }
+            """,
+            diagnostics: [
+                .init(
+                    message: "#snapshot with 'named:' uses file-backed storage. Remove the trailing closure, or remove 'named:' to use inline comparison.",
+                    line: 1,
+                    column: 1
+                )
+            ],
+            macros: ["snapshot": SnapshotMacro.self]
         )
     }
 

@@ -20,7 +20,6 @@ struct TestingMacrosPlugin: CompilerPlugin {
         TestsMacro.self,
         ExpectMacro.self,
         RequireMacro.self,
-        ExpectSnapshotMacro.self,
-        ExpectInlineSnapshotMacro.self,
+        SnapshotMacro.self,
     ]
 }
