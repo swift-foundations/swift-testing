@@ -1,6 +1,7 @@
 import Testing
 import Testing_Test_Support
 import Test_Primitives
+import Dependency_Primitives
 
 extension Testing {
     @Suite
@@ -22,7 +23,7 @@ extension Testing.HelpersTest.Unit {
     @Testing.Test
     func expectWithFalseReturnsFailingExpectation() {
         let collector = Test.Expectation.Collector()
-        let expectation = Test.Expectation.Collector.$current.withValue(collector) {
+        let expectation = Dependency.Scope.with({ $0[Test.Expectation.Collector.Key.self] = collector }) {
             Testing.__expect(false)
         }
         #expect(expectation.isFailing)
@@ -48,7 +49,7 @@ extension Testing.HelpersTest.EdgeCase {
     func requireWithFalseThrows() {
         let collector = Test.Expectation.Collector()
         do {
-            try Test.Expectation.Collector.$current.withValue(collector) {
+            try Dependency.Scope.with({ $0[Test.Expectation.Collector.Key.self] = collector }) {
                 try Testing.__require(false)
             }
             #expect(false, "Expected __require(false) to throw")
@@ -63,7 +64,7 @@ extension Testing.HelpersTest.EdgeCase {
         let value: Int? = nil
         let collector = Test.Expectation.Collector()
         do {
-            _ = try Test.Expectation.Collector.$current.withValue(collector) {
+            _ = try Dependency.Scope.with({ $0[Test.Expectation.Collector.Key.self] = collector }) {
                 try Testing.__require(value)
             }
             #expect(false, "Expected __require(nil) to throw")
