@@ -22,8 +22,8 @@ extension Testing {
     ///
     /// - Returns: Never returns; exits the process.
     public static func __swiftPMEntryPoint() async -> Never {
-        let fallbackNames = Test.Manifest.getFactoryNames()
-        let registry = Discovery.discoverAll(fallbackFactoryNames: fallbackNames)
+        let fallbackNames = Test.Manifest.factoryNames
+        let registry = Discovery.all(fallback: fallbackNames)
         let hasFailures = await runReturningResult(registry: registry)
         ISO_9945.Kernel.Process.Exit.now(hasFailures ? 1 : 0)
     }
@@ -60,8 +60,8 @@ extension Testing {
     public static func main() async {
         // Primary: section-based discovery (automatic)
         // Fallback: dlsym with manifest factory names
-        let fallbackNames = Test.Manifest.getFactoryNames()
-        let registry = Discovery.discoverAll(fallbackFactoryNames: fallbackNames)
+        let fallbackNames = Test.Manifest.factoryNames
+        let registry = Discovery.all(fallback: fallbackNames)
         await run(registry: registry)
     }
 
@@ -82,9 +82,9 @@ extension Testing {
     /// Discovers tests from section records and executes them with console output.
     ///
     /// - Returns: `true` if any test failed, `false` if all passed.
-    public static func runAll() async -> Bool {
-        let fallbackNames = Test.Manifest.getFactoryNames()
-        let registry = Discovery.discoverAll(fallbackFactoryNames: fallbackNames)
+    public static func run() async -> Bool {
+        let fallbackNames = Test.Manifest.factoryNames
+        let registry = Discovery.all(fallback: fallbackNames)
         return await runReturningResult(registry: registry)
     }
 
@@ -95,7 +95,7 @@ extension Testing {
 
     /// Internal runner that executes a test plan and returns whether there were failures.
     private static func runReturningResult(registry: consuming Test.Plan.Registry) async -> Bool {
-        let config = Configuration.fromEnvironment()
+        let config = Configuration.current
 
         // Apply filters
         // TODO: Implement filtering based on config.filter and config.tags
@@ -105,11 +105,11 @@ extension Testing {
 
         // Create reporter based on output format
         let reporter: Test.Reporter
-        switch config.outputFormat {
+        switch config.output.format {
         case .console:
             reporter = Testing.Reporter.console
         case .json:
-            reporter = Testing.Reporter.json(to: config.outputPath)
+            reporter = Testing.Reporter.json(to: config.output.path)
         }
 
         // Create and run the runner

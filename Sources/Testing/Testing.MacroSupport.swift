@@ -9,11 +9,15 @@
 //
 // ===----------------------------------------------------------------------===//
 
-//
 // This file provides unambiguous type references for macro expansions.
 // When user code creates a local `Test` type (e.g., via #Tests), it shadows
 // the global Test namespace. These typealiases provide stable references.
 //
+// WORKAROUND: Compound typealias names (__TestID, SuiteRegistration, etc.) [API-NAME-001]
+// WHY: Macro-generated code references these by fully-qualified name (Testing.__TestID, etc.).
+//   Renaming requires updating all macro codegen sites and verifying ABI stability.
+// WHEN TO REMOVE: When macro codegen can use nested type references (Testing.Suite.Registration).
+// TRACKING: naming-implementation-audit-swift-tests-swift-testing.md N46, N48
 
 public import Test_Primitives
 public import Tests

@@ -23,16 +23,16 @@ extension Testing.Reporter {
     /// - Returns: A reporter that outputs to the console.
     public static var console: Test.Reporter {
         Test.Reporter {
-            Test.Reporter.Sink(ConsoleSink())
+            Test.Reporter.Sink(Terminal())
         }
     }
 }
 
-// MARK: - ConsoleSink
+// MARK: - Terminal
 
 extension Testing.Reporter {
     /// Console sink implementation.
-    private final class ConsoleSink: Test.Reporter.SinkImplementation, @unchecked Sendable {
+    private final class Terminal: Test.Reporter.SinkImplementation, @unchecked Sendable {
         private let capability: Console.Capability
         private var passedCount = 0
         private var failedCount = 0
@@ -84,23 +84,21 @@ extension Testing.Reporter {
                 if let id = event.id {
                     var message = "  \(dimmed("○")) \(id.name)\(dimmed(" (skipped)"))"
                     if let reason {
-                        message += dimmed(": \(reason.plainText)")
+                        message += dimmed(": \(render(reason))")
                     }
                     print(message)
                 }
 
             case .issueRecorded(let issue):
                 issueCount += 1
-                let marker = Console.Style.warning.apply(to: "⚠", capability: capability)
-                print("    \(marker) \(issue.kind)")
+                print("    \(Console.Style.warning.apply(to: "⚠", capability: capability)) \(issue.kind)")
                 if let context = issue.context {
-                    printIndented(render(context), indent: "      ")
+                    indented(render(context), indent: "      ")
                 }
 
             case .expectationChecked(let expectation):
                 if expectation.isFailing {
-                    let marker = Console.Style.error.apply(to: "✗", capability: capability)
-                    print("    \(marker) \(expectation.expression.sourceCode)")
+                    print("    \(Console.Style.error.apply(to: "✗", capability: capability)) \(expectation.expression.sourceCode)")
 
                     // Source location
                     let loc = expectation.expression.sourceLocation
@@ -108,7 +106,7 @@ extension Testing.Reporter {
 
                     if let failure = expectation.failure {
                         // Failure message
-                        printIndented(render(failure.message), indent: "      ")
+                        indented(render(failure.message), indent: "      ")
 
                         // Expected vs actual
                         if let expected = failure.expected, let actual = failure.actual {
@@ -125,7 +123,7 @@ extension Testing.Reporter {
                         // Structured diff
                         if let difference = failure.difference {
                             print("")
-                            printIndented(render(difference), indent: "      ")
+                            indented(render(difference), indent: "      ")
                         }
 
                         // User comment
@@ -138,24 +136,21 @@ extension Testing.Reporter {
             case .runEnded:
                 print("")
                 print("Test run complete:")
-                let passed = Console.Style.success.apply(
+                print(Console.Style.success.apply(
                     to: "  Passed:  \(passedCount)", capability: capability
-                )
-                print(passed)
+                ))
                 if failedCount > 0 {
-                    let failed = Console.Style.error.apply(
+                    print(Console.Style.error.apply(
                         to: "  Failed:  \(failedCount)", capability: capability
-                    )
-                    print(failed)
+                    ))
                 }
                 if skippedCount > 0 {
                     print(dimmed("  Skipped: \(skippedCount)"))
                 }
                 if issueCount > 0 {
-                    let issues = Console.Style.warning.apply(
+                    print(Console.Style.warning.apply(
                         to: "  Issues:  \(issueCount)", capability: capability
-                    )
-                    print(issues)
+                    ))
                 }
 
             case .planCreated:
@@ -177,7 +172,7 @@ extension Testing.Reporter {
 
         private func render(_ text: Test.Text) -> Swift.String {
             text.segments.map { segment in
-                consoleStyle(for: segment.style)
+                style(for: segment.style)
                     .apply(to: segment.content, capability: capability)
             }.joined()
         }
@@ -186,13 +181,13 @@ extension Testing.Reporter {
             Console.Style.dim.apply(to: text, capability: capability)
         }
 
-        private func printIndented(_ text: Swift.String, indent: Swift.String) {
+        private func indented(_ text: Swift.String, indent: Swift.String) {
             for line in text.split(separator: "\n", omittingEmptySubsequences: false) {
                 print("\(indent)\(line)")
             }
         }
 
-        private func consoleStyle(
+        private func style(
             for style: Test.Text.Segment.Style
         ) -> Console.Style {
             switch style {

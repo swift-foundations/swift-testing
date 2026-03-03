@@ -40,16 +40,13 @@ public struct ExpectMacro: ExpressionMacro {
         in context: some MacroExpansionContext
     ) throws -> ExprSyntax {
         guard let firstArg = node.arguments.first?.expression else {
-            throw ExpectMacroError.missingCondition
+            throw Error.missingCondition
         }
 
         // Check for optional comment argument
-        let comment: String
-        if node.arguments.count > 1, let commentArg = node.arguments.dropFirst().first?.expression {
-            comment = commentArg.description
-        } else {
-            comment = "nil"
-        }
+        let comment = node.arguments.count > 1
+            ? (node.arguments.dropFirst().first?.expression.description ?? "nil")
+            : "nil"
 
         return """
             Testing.__expect(
@@ -64,13 +61,15 @@ public struct ExpectMacro: ExpressionMacro {
     }
 }
 
-enum ExpectMacroError: Error, CustomStringConvertible {
-    case missingCondition
+extension ExpectMacro {
+    enum Error: Swift.Error, CustomStringConvertible {
+        case missingCondition
 
-    var description: String {
-        switch self {
-        case .missingCondition:
-            return "#expect requires a condition argument"
+        var description: String {
+            switch self {
+            case .missingCondition:
+                return "#expect requires a condition argument"
+            }
         }
     }
 }

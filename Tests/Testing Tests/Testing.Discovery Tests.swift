@@ -12,15 +12,15 @@ extension Testing.Discovery {
 
 extension Testing.Discovery.Test.Integration {
     @Testing.Test
-    func discoverFromSectionsReturnsARegistry() {
-        let registry = Testing.Discovery.discoverFromSections()
+    func sectionsReturnsARegistry() {
+        let registry = Testing.Discovery.sections()
         // Registry was constructed — section enumeration completed without crash
         _ = registry
     }
 
     @Testing.Test
-    func discoverAllReturnsARegistry() {
-        let registry = Testing.Discovery.discoverAll()
+    func allReturnsARegistry() {
+        let registry = Testing.Discovery.all()
         _ = registry
     }
 }

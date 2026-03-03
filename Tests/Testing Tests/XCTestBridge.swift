@@ -106,8 +106,8 @@ final class ConfigurationTests: XCTestCase {
         Testing.Configuration.Test.Unit().stubFactoryCreatesConfigurationWithProvidedValues()
     }
 
-    func testFromEnvironmentWithNoEnvVarsReturnsDefaults() {
-        Testing.Configuration.Test.EdgeCase().fromEnvironmentWithNoEnvVarsReturnsDefaults()
+    func testCurrentWithNoEnvVarsReturnsDefaults() {
+        Testing.Configuration.Test.EdgeCase().currentWithNoEnvVarsReturnsDefaults()
     }
 }
 
@@ -122,12 +122,12 @@ final class ConfigurationOutputFormatTests: XCTestCase {
 // MARK: - Discovery Tests
 
 final class DiscoveryTests: XCTestCase {
-    func testDiscoverFromSectionsReturnsARegistry() {
-        Testing.Discovery.Test.Integration().discoverFromSectionsReturnsARegistry()
+    func testSectionsReturnsARegistry() {
+        Testing.Discovery.Test.Integration().sectionsReturnsARegistry()
     }
 
-    func testDiscoverAllReturnsARegistry() {
-        Testing.Discovery.Test.Integration().discoverAllReturnsARegistry()
+    func testAllReturnsARegistry() {
+        Testing.Discovery.Test.Integration().allReturnsARegistry()
     }
 }
 

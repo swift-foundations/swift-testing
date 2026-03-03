@@ -23,7 +23,7 @@ extension Testing.Reporter {
     /// A test reporter sink that outputs JSON.
     ///
     /// Produces JSON without Foundation by manually constructing UTF-8 bytes.
-    final class JSONSink: Test.Reporter.SinkImplementation, @unchecked Sendable {
+    final class JSON: Test.Reporter.SinkImplementation, @unchecked Sendable {
         let outputPath: Swift.String?
         var events: [Test.Event] = []
 
@@ -36,23 +36,23 @@ extension Testing.Reporter {
         }
 
         func finish() async {
-            let json = buildJSON()
+            let json = json()
             let bytes = Array(json.utf8)
 
             if let path = outputPath {
-                writeToFile(path: path, bytes: bytes)
+                write(to: path, bytes: bytes)
             } else {
-                writeToStdout(bytes: bytes)
+                write(stdout: bytes)
             }
         }
 
-        private func buildJSON() -> Swift.String {
+        private func json() -> Swift.String {
             var json = "{\n"
             json += "  \"events\": [\n"
 
             for (index, event) in events.enumerated() {
                 json += "    "
-                json += eventToJSON(event)
+                json += self.json(from: event)
                 if index < events.count - 1 {
                     json += ","
                 }
@@ -65,7 +65,7 @@ extension Testing.Reporter {
             return json
         }
 
-        private func eventToJSON(_ event: Test.Event) -> Swift.String {
+        private func json(from event: Test.Event) -> Swift.String {
             // Simplified JSON encoding - production would need proper escaping
             var json = "{"
             json += "\"kind\": \"\(event.kind)\""
@@ -79,7 +79,7 @@ extension Testing.Reporter {
             return json
         }
 
-        private func writeToFile(path: Swift.String, bytes: [UInt8]) {
+        private func write(to path: Swift.String, bytes: [UInt8]) {
             do {
                 let descriptor = try Kernel.Path.scope(path) { pathView in
                     try ISO_9945.Kernel.File.Open.open(
@@ -104,7 +104,7 @@ extension Testing.Reporter {
             }
         }
 
-        private func writeToStdout(bytes: [UInt8]) {
+        private func write(stdout bytes: [UInt8]) {
             // Use Swift's print for stdout — avoids needing raw descriptor construction
             print(Swift.String(decoding: bytes, as: UTF8.self), terminator: "")
         }

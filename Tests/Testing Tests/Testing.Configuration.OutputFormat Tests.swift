@@ -17,13 +17,13 @@ extension Testing.Configuration.OutputFormat.Test.Unit {
         let json = Testing.Configuration.OutputFormat.json
 
         var config = Testing.Configuration()
-        config.outputFormat = console
-        if case .json = config.outputFormat {
+        config.output.format = console
+        if case .json = config.output.format {
             #expect(false, "Console should not match json")
         }
 
-        config.outputFormat = json
-        if case .console = config.outputFormat {
+        config.output.format = json
+        if case .console = config.output.format {
             #expect(false, "JSON should not match console")
         }
     }

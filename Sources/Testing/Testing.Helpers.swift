@@ -89,9 +89,6 @@ extension Testing {
 // MARK: - Factory Registration Helper
 
 extension Testing {
-    /// C-compatible function type for factory functions.
-    public typealias FactoryFunction = @convention(c) () -> UnsafeRawPointer
-
     /// Creates a boxed registration and returns it as an unsafe pointer.
     ///
     /// Used by @Test macro expansion to create factory functions.

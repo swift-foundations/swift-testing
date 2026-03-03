@@ -24,7 +24,7 @@ public struct TestMacro: PeerMacro {
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
         guard let funcDecl = declaration.as(FunctionDeclSyntax.self) else {
-            throw MacroError.requiresFunction
+            throw Error.requiresFunction
         }
 
         let funcName = funcDecl.name.text
@@ -179,16 +179,18 @@ public struct TestMacro: PeerMacro {
 
 // MARK: - Errors
 
-enum MacroError: Error, CustomStringConvertible {
-    case requiresFunction
-    case requiresStruct
+extension TestMacro {
+    enum Error: Swift.Error, CustomStringConvertible {
+        case requiresFunction
+        case requiresStruct
 
-    var description: String {
-        switch self {
-        case .requiresFunction:
-            return "@Test can only be applied to functions"
-        case .requiresStruct:
-            return "@Suite can only be applied to structs or classes"
+        var description: String {
+            switch self {
+            case .requiresFunction:
+                return "@Test can only be applied to functions"
+            case .requiresStruct:
+                return "@Suite can only be applied to structs or classes"
+            }
         }
     }
 }

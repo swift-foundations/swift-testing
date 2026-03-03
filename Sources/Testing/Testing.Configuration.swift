@@ -31,23 +31,19 @@ extension Testing {
         /// Concurrency mode for test execution.
         public var concurrency: Test.Runner.Concurrency
 
-        /// Output format.
-        public var outputFormat: OutputFormat
-
-        /// File path for output (nil = stdout).
-        public var outputPath: Swift.String?
+        /// Output configuration (format and destination).
+        public var output: Output
 
         /// Creates a default configuration.
         public init() {
             self.filter = nil
             self.tags = nil
             self.concurrency = .automatic
-            self.outputFormat = .console
-            self.outputPath = nil
+            self.output = Output()
         }
 
-        /// Loads configuration from environment variables.
-        public static func fromEnvironment() -> Configuration {
+        /// Current configuration loaded from environment variables.
+        public static var current: Configuration {
             var config = Configuration()
 
             if let filter = Environment.read("SWIFT_TEST_FILTER") {
@@ -69,14 +65,14 @@ extension Testing {
                 }
             }
 
-            if let output = Environment.read("SWIFT_TEST_OUTPUT") {
-                if output.lowercased() == "json" {
-                    config.outputFormat = .json
+            if let outputValue = Environment.read("SWIFT_TEST_OUTPUT") {
+                if outputValue.lowercased() == "json" {
+                    config.output.format = .json
                 }
             }
 
             if let path = Environment.read("SWIFT_TEST_OUTPUT_PATH") {
-                config.outputPath = path
+                config.output.path = path
             }
 
             return config

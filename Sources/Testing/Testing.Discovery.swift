@@ -28,7 +28,7 @@ extension Testing {
         /// to find test content records emitted by `@Test` macro expansions.
         ///
         /// - Returns: A registry containing all discovered tests.
-        public static func discoverFromSections() -> Test.Plan.Registry {
+        public static func sections() -> Test.Plan.Registry {
             var registry = Test.Plan.Registry()
 
             // Enumerate all test content sections
@@ -121,7 +121,7 @@ extension Testing {
         /// `__testContentRecord` property provides a test content record tuple.
         ///
         /// - Returns: A registry containing all discovered tests.
-        public static func discoverFromTypeMetadata() -> Test.Plan.Registry {
+        public static func typeMetadata() -> Test.Plan.Registry {
             var registry = Test.Plan.Registry()
 
             let types = Loader.types(named: "__🟡$")
@@ -218,22 +218,22 @@ extension Testing {
         /// Tries section-based discovery first, then falls back to
         /// symbol-based discovery if no tests are found.
         ///
-        /// - Parameter fallbackFactoryNames: Factory names to try if section discovery fails.
+        /// - Parameter fallback: Factory names to try if section discovery fails.
         /// - Returns: A registry containing all discovered tests.
-        public static func discoverAll(
-            fallbackFactoryNames: [Swift.String] = []
+        public static func all(
+            fallback: [Swift.String] = []
         ) -> Test.Plan.Registry {
             // Try section-based discovery first (Swift 6.3+)
-            var registry = discoverFromSections()
+            var registry = sections()
 
             // Fall back to type-metadata discovery (Swift < 6.3)
             if registry.isEmpty {
-                registry = discoverFromTypeMetadata()
+                registry = typeMetadata()
             }
 
             // Final fallback: dlsym-based discovery
-            if registry.isEmpty && !fallbackFactoryNames.isEmpty {
-                registry = discover(factoryNames: fallbackFactoryNames)
+            if registry.isEmpty && !fallback.isEmpty {
+                registry = discover(factoryNames: fallback)
             }
 
             return registry

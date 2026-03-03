@@ -35,7 +35,7 @@ extension Testing.Configuration.Test.Unit {
     @Testing.Test
     func initCreatesDefaultConfigurationWithConsoleOutputFormat() {
         let config = Testing.Configuration()
-        if case .console = config.outputFormat {} else {
+        if case .console = config.output.format {} else {
             #expect(false, "Expected .console output format")
         }
     }
@@ -43,7 +43,7 @@ extension Testing.Configuration.Test.Unit {
     @Testing.Test
     func initCreatesDefaultConfigurationWithNilOutputPath() {
         let config = Testing.Configuration()
-        #expect(config.outputPath == nil)
+        #expect(config.output.path == nil)
     }
 
     @Testing.Test
@@ -51,13 +51,13 @@ extension Testing.Configuration.Test.Unit {
         let config = Testing.Configuration.stub(
             filter: "MyTest",
             concurrency: .serial,
-            outputFormat: .json
+            output: .init(format: .json)
         )
         #expect(config.filter == "MyTest")
         if case .serial = config.concurrency {} else {
             #expect(false, "Expected .serial concurrency")
         }
-        if case .json = config.outputFormat {} else {
+        if case .json = config.output.format {} else {
             #expect(false, "Expected .json output format")
         }
     }
@@ -67,8 +67,8 @@ extension Testing.Configuration.Test.Unit {
 
 extension Testing.Configuration.Test.EdgeCase {
     @Testing.Test
-    func fromEnvironmentWithNoEnvVarsReturnsDefaults() {
-        let config = Testing.Configuration.fromEnvironment()
-        #expect(config.outputPath == nil)
+    func currentWithNoEnvVarsReturnsDefaults() {
+        let config = Testing.Configuration.current
+        #expect(config.output.path == nil)
     }
 }

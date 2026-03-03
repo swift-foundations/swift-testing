@@ -15,12 +15,12 @@ extension Testing.Reporter.Test.Unit {
     func consoleFactoryCreatesAReporter() {
         let reporter = Testing.Reporter.console
         // Reporter exists — verify it can create a sink
-        let _ = reporter.makeSink()
+        let _ = reporter.sink()
     }
 
     @Testing.Test
     func jsonFactoryWithNilPathCreatesAReporter() {
         let reporter = Testing.Reporter.json(to: nil)
-        let _ = reporter.makeSink()
+        let _ = reporter.sink()
     }
 }

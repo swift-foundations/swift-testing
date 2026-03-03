@@ -13,15 +13,13 @@ extension Testing.Configuration {
         filter: Swift.String? = nil,
         tags: Swift.Set<Swift.String>? = nil,
         concurrency: Test_Primitives.Test.Runner.Concurrency = .serial,
-        outputFormat: OutputFormat = .console,
-        outputPath: Swift.String? = nil
+        output: Output = Output()
     ) -> Self {
         var config = Self()
         config.filter = filter
         config.tags = tags
         config.concurrency = concurrency
-        config.outputFormat = outputFormat
-        config.outputPath = outputPath
+        config.output = output
         return config
     }
 }

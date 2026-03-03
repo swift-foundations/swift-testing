@@ -55,18 +55,18 @@ public struct SnapshotMacro: ExpressionMacro {
         }
 
         guard let value = valueExpr else {
-            throw SnapshotMacroError.missingValue
+            throw Error.missingValue
         }
 
         guard let strategy = strategyExpr else {
-            throw SnapshotMacroError.missingStrategy
+            throw Error.missingStrategy
         }
 
         let hasTrailingClosure = node.trailingClosure != nil
         let hasName = nameExpr != nil
 
         if hasName && hasTrailingClosure {
-            throw SnapshotMacroError.namedWithTrailingClosure
+            throw Error.namedWithTrailingClosure
         }
 
         let recordArg = recordExpr.map { "record: \($0)," } ?? ""
@@ -112,19 +112,21 @@ public struct SnapshotMacro: ExpressionMacro {
     }
 }
 
-enum SnapshotMacroError: Error, CustomStringConvertible {
-    case missingValue
-    case missingStrategy
-    case namedWithTrailingClosure
+extension SnapshotMacro {
+    enum Error: Swift.Error, CustomStringConvertible {
+        case missingValue
+        case missingStrategy
+        case namedWithTrailingClosure
 
-    var description: Swift.String {
-        switch self {
-        case .missingValue:
-            return "#snapshot requires a value to snapshot"
-        case .missingStrategy:
-            return "#snapshot requires a strategy (as: .lines, .text, .json, etc.)"
-        case .namedWithTrailingClosure:
-            return "#snapshot with 'named:' uses file-backed storage. Remove the trailing closure, or remove 'named:' to use inline comparison."
+        var description: Swift.String {
+            switch self {
+            case .missingValue:
+                return "#snapshot requires a value to snapshot"
+            case .missingStrategy:
+                return "#snapshot requires a strategy (as: .lines, .text, .json, etc.)"
+            case .namedWithTrailingClosure:
+                return "#snapshot with 'named:' uses file-backed storage. Remove the trailing closure, or remove 'named:' to use inline comparison."
+            }
         }
     }
 }

@@ -20,7 +20,7 @@ extension Testing {
         /// - Returns: A reporter that outputs JSON.
         public static func json(to path: Swift.String?) -> Test.Reporter {
             Test.Reporter {
-                Test.Reporter.Sink(JSONSink(outputPath: path))
+                Test.Reporter.Sink(JSON(outputPath: path))
             }
         }
     }

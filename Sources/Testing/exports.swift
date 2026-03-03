@@ -18,7 +18,7 @@
 // The umbrella module handles that to ensure macro/type coexistence.
 
 // Re-export Tier 2 (runner infrastructure) for convenience
-// Includes: Test.Runner, Test.Plan, ExclusionController
+// Includes: Test.Runner, Test.Plan, Test.Exclusion.Controller
 @_exported public import Tests
 
 // Platform abstraction for discovery and I/O

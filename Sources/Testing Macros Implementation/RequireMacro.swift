@@ -33,16 +33,13 @@ public struct RequireMacro: ExpressionMacro {
         in context: some MacroExpansionContext
     ) throws -> ExprSyntax {
         guard let firstArg = node.arguments.first?.expression else {
-            throw RequireMacroError.missingCondition
+            throw Error.missingCondition
         }
 
         // Check for optional comment argument
-        let comment: String
-        if node.arguments.count > 1, let commentArg = node.arguments.dropFirst().first?.expression {
-            comment = commentArg.description
-        } else {
-            comment = "nil"
-        }
+        let comment = node.arguments.count > 1
+            ? (node.arguments.dropFirst().first?.expression.description ?? "nil")
+            : "nil"
 
         // The expansion works for both Bool and Optional types
         // The overloaded __require functions handle the difference
@@ -59,13 +56,15 @@ public struct RequireMacro: ExpressionMacro {
     }
 }
 
-enum RequireMacroError: Error, CustomStringConvertible {
-    case missingCondition
+extension RequireMacro {
+    enum Error: Swift.Error, CustomStringConvertible {
+        case missingCondition
 
-    var description: String {
-        switch self {
-        case .missingCondition:
-            return "#require requires a condition or optional argument"
+        var description: String {
+            switch self {
+            case .missingCondition:
+                return "#require requires a condition or optional argument"
+            }
         }
     }
 }
