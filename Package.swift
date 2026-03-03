@@ -59,6 +59,7 @@ let package = Package(
                 "Testing Core",
                 "Testing Macros Implementation",
                 .product(name: "Test Primitives", package: "swift-test-primitives"),
+                .product(name: "Tests Inline Snapshot", package: "swift-tests"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacroExpansion", package: "swift-syntax"),
@@ -72,6 +73,7 @@ let package = Package(
             name: "Testing Core",
             dependencies: [
                 .product(name: "Tests", package: "swift-tests"),
+                .product(name: "Tests Inline Snapshot", package: "swift-tests"),
                 .product(name: "Test Primitives", package: "swift-test-primitives"),
                 .product(name: "Standard Library Extensions", package: "swift-standard-library-extensions"),
                 .product(name: "Time Primitives", package: "swift-time-primitives"),

@@ -10,6 +10,7 @@
 // ===----------------------------------------------------------------------===//
 
 import Dependencies
+import Tests_Inline_Snapshot
 import Witnesses
 import Kernel
 

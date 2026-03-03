@@ -9,6 +9,8 @@
 //
 // ===----------------------------------------------------------------------===//
 
+import Tests_Inline_Snapshot
+
 /// Asserts that a value matches its snapshot.
 ///
 /// Dispatches to inline or file-backed comparison based on parameters:
