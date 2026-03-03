@@ -44,6 +44,8 @@ let package = Package(
         .package(path: "../swift-effects"),
         // Witness system (mode context for test/live execution)
         .package(path: "../swift-witnesses"),
+        // Console output (terminal capability detection, ANSI styling)
+        .package(path: "../swift-console"),
         // Macro implementation
         .package(url: "https://github.com/swiftlang/swift-syntax", "602.0.0"..<"603.0.0")
     ],
@@ -77,7 +79,8 @@ let package = Package(
                 .product(name: "Environment", package: "swift-environment"),
                 .product(name: "Loader", package: "swift-loader"),
                 .product(name: "Dependencies", package: "swift-dependencies"),
-                .product(name: "Witnesses", package: "swift-witnesses")
+                .product(name: "Witnesses", package: "swift-witnesses"),
+                .product(name: "Console", package: "swift-console")
             ],
             path: "Sources/Testing"
         ),
