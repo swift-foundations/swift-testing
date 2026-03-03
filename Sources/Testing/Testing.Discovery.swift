@@ -14,20 +14,21 @@ internal import Loader_Primitives
 internal import Ownership_Primitives
 
 extension Testing {
-    /// Test discovery via section enumeration and symbol lookup.
+    /// Test and suite discovery via section enumeration and symbol lookup.
     ///
-    /// Primary discovery uses section-based enumeration of test content records.
-    /// Falls back to dlsym-based lookup if section discovery finds nothing.
+    /// Primary discovery uses section-based enumeration of test content records
+    /// (both `@Test` and `@Suite`). Falls back to dlsym-based lookup if
+    /// section discovery finds nothing.
     public struct Discovery: Sendable {
 
         // MARK: - Primary: Section-Based Discovery
 
-        /// Discovers all tests from binary section records.
+        /// Discovers all tests and suites from binary section records.
         ///
         /// Enumerates the `__swift5_tests` section (or platform equivalent)
-        /// to find test content records emitted by `@Test` macro expansions.
+        /// to find test content records emitted by `@Test` and `@Suite` macro expansions.
         ///
-        /// - Returns: A registry containing all discovered tests.
+        /// - Returns: A registry containing all discovered tests and suites.
         public static func sections() -> Test.Plan.Registry {
             var registry = Test.Plan.Registry()
 
@@ -82,45 +83,68 @@ extension Testing {
                     return unsafe temp[0]
                 }
 
-                // Check if this is a test record (kind == 'test')
-                guard unsafe record.kind == Test.__TestContentKind.test.rawValue else {
-                    continue
-                }
+                unsafe processRecord(record, into: &registry)
+            }
+        }
 
-                // Call the accessor to get the registration
-                guard let accessor = unsafe record.accessor else {
-                    continue
-                }
+        // MARK: - Record Processing
 
-                var registrationPtr: UnsafeRawPointer? = nil
-                let success = unsafe accessor(
-                    &registrationPtr,
-                    UnsafeRawPointer(bitPattern: 1)!,
-                    UnsafeRawPointer?(nil),
-                    0
-                )
+        /// Processes a single test content record into the registry.
+        ///
+        /// Calls the record's accessor to obtain a boxed registration,
+        /// then dispatches based on kind:
+        /// - `.test` records are unboxed as ``Test/Registration`` and added as tests.
+        /// - `.suite` records are unboxed as ``Test/Suite/Registration`` and added as suites.
+        /// - Other kinds (e.g., `.exitTest`) are skipped.
+        ///
+        /// - Parameters:
+        ///   - record: The test content record tuple from a binary section or type metadata.
+        ///   - registry: The registry to add discovered content to.
+        private static func processRecord(
+            _ record: Test.__TestContentRecord,
+            into registry: inout Test.Plan.Registry
+        ) {
+            let kind = unsafe record.kind
 
-                guard success, let ptr = unsafe registrationPtr else {
-                    continue
-                }
+            guard kind == Test.__TestContentKind.test.rawValue
+               || kind == Test.__TestContentKind.suite.rawValue else {
+                return
+            }
 
-                // Unbox the registration
-                let boxed = unsafe Unmanaged<Test.Box<Test.Registration>>.fromOpaque(ptr).takeRetainedValue()
-                let reg = boxed.value
+            guard let accessor = unsafe record.accessor else {
+                return
+            }
 
+            var registrationPtr: UnsafeRawPointer? = nil
+            let success = unsafe accessor(
+                &registrationPtr,
+                UnsafeRawPointer(bitPattern: 1)!,
+                UnsafeRawPointer?(nil),
+                0
+            )
+
+            guard success, let ptr = unsafe registrationPtr else {
+                return
+            }
+
+            if kind == Test.__TestContentKind.suite.rawValue {
+                let reg = unsafe Ownership.Transfer.Retained<Test.Box<Test.Suite.Registration>>(ptr).take().value
+                registry.add(suite: reg)
+            } else {
+                let reg = unsafe Ownership.Transfer.Retained<Test.Box<Test.Registration>>(ptr).take().value
                 registry.add(id: reg.id, modifiers: reg.modifiers, body: reg.body)
             }
         }
 
         // MARK: - Legacy: Type Metadata-Based Discovery
 
-        /// Discovers tests from type metadata (legacy, Swift < 6.3).
+        /// Discovers tests and suites from type metadata (legacy, Swift < 6.3).
         ///
         /// Scans `__swift5_types` for enum types named `__🟡$...` that conform to
         /// `__TestContentRecordContainer`. Each matching type's
         /// `__testContentRecord` property provides a test content record tuple.
         ///
-        /// - Returns: A registry containing all discovered tests.
+        /// - Returns: A registry containing all discovered tests and suites.
         public static func typeMetadata() -> Test.Plan.Registry {
             var registry = Test.Plan.Registry()
 
@@ -131,32 +155,7 @@ extension Testing {
                     continue
                 }
 
-                let record = unsafe container.__testContentRecord
-
-                guard unsafe record.kind == Test.__TestContentKind.test.rawValue else {
-                    continue
-                }
-
-                guard let accessor = unsafe record.accessor else {
-                    continue
-                }
-
-                var registrationPtr: UnsafeRawPointer? = nil
-                let success = unsafe accessor(
-                    &registrationPtr,
-                    UnsafeRawPointer(bitPattern: 1)!,
-                    UnsafeRawPointer?(nil),
-                    0
-                )
-
-                guard success, let ptr = unsafe registrationPtr else {
-                    continue
-                }
-
-                let boxed = unsafe Unmanaged<Test.Box<Test.Registration>>.fromOpaque(ptr).takeRetainedValue()
-                let reg = boxed.value
-
-                registry.add(id: reg.id, modifiers: reg.modifiers, body: reg.body)
+                unsafe processRecord(container.__testContentRecord, into: &registry)
             }
 
             return registry
@@ -187,9 +186,7 @@ extension Testing {
                 let factory = unsafe unsafeBitCast(ptr, to: Factory.self)
                 let boxedPtr = unsafe factory()
 
-                let boxed = unsafe Unmanaged<Test.Box<Test.Registration>>.fromOpaque(boxedPtr).takeRetainedValue()
-                let reg = boxed.value
-
+                let reg = unsafe Ownership.Transfer.Retained<Test.Box<Test.Registration>>(boxedPtr).take().value
                 registry.add(id: reg.id, modifiers: reg.modifiers, body: reg.body)
             }
 
