@@ -29,6 +29,7 @@ public struct SnapshotMacro: ExpressionMacro {
         var nameExpr: Swift.String?
         var recordExpr: Swift.String?
         var redactingExpr: Swift.String = "[]"
+        var matchesExpr: Swift.String?
 
         for argument in node.arguments {
             let label = argument.label?.text
@@ -48,7 +49,7 @@ public struct SnapshotMacro: ExpressionMacro {
             case "redacting":
                 redactingExpr = expr.description
             case "matches":
-                break
+                matchesExpr = expr.description
             default:
                 break
             }
@@ -65,7 +66,9 @@ public struct SnapshotMacro: ExpressionMacro {
         let hasTrailingClosure = node.trailingClosure != nil
         let hasName = nameExpr != nil
 
-        if hasName && hasTrailingClosure {
+        let hasMatches = hasTrailingClosure || matchesExpr != nil
+
+        if hasName && hasMatches {
             throw Error.namedWithTrailingClosure
         }
 
@@ -87,11 +90,13 @@ public struct SnapshotMacro: ExpressionMacro {
                 )
                 """
         } else {
-            let matchesExpr: Swift.String
+            let matches: Swift.String
             if let trailingClosure = node.trailingClosure {
-                matchesExpr = "{ \(trailingClosure.statements) }"
+                matches = "{ \(trailingClosure.statements) }"
+            } else if let labeled = matchesExpr {
+                matches = labeled
             } else {
-                matchesExpr = "nil"
+                matches = "nil"
             }
 
             return """
@@ -100,7 +105,7 @@ public struct SnapshotMacro: ExpressionMacro {
                     as: \(strategy),
                     \(raw: recordArg)
                     redacting: \(raw: redactingExpr),
-                    matches: \(raw: matchesExpr),
+                    matches: \(raw: matches),
                     fileID: #fileID,
                     filePath: #filePath,
                     line: #line,

@@ -137,6 +137,49 @@ extension MacroExpansionTests.Unit {
     }
 
     @Testing.Test
+    func `snapshot macro with labeled matches expands correctly`() throws {
+        try assertMacroExpansion(
+            """
+            #snapshot(output, as: .lines, matches: { "expected" })
+            """,
+            expandedSource: """
+            Testing.__snapshotInline(
+                output,
+                as: .lines,
+                redacting: [],
+                matches: { "expected" },
+                fileID: #fileID,
+                filePath: #filePath,
+                line: #line,
+                column: #column,
+                function: #function
+            )
+            """,
+            macros: ["snapshot": SnapshotMacro.self]
+        )
+    }
+
+    @Testing.Test
+    func `snapshot macro with named and labeled matches produces error`() throws {
+        try assertMacroExpansion(
+            """
+            #snapshot(output, as: .lines, named: "x", matches: { "expected" })
+            """,
+            expandedSource: """
+            #snapshot(output, as: .lines, named: "x", matches: { "expected" })
+            """,
+            diagnostics: [
+                .init(
+                    message: "#snapshot with 'named:' uses file-backed storage. Remove the trailing closure, or remove 'named:' to use inline comparison.",
+                    line: 1,
+                    column: 1
+                )
+            ],
+            macros: ["snapshot": SnapshotMacro.self]
+        )
+    }
+
+    @Testing.Test
     func `snapshot macro with named and trailing closure produces error`() throws {
         try assertMacroExpansion(
             """
