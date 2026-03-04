@@ -77,7 +77,7 @@ extension Testing {
 
     /// Bridge for `#snapshot` inline expansion (sync).
     @discardableResult
-    public static func __snapshotInline<Value: Sendable>(
+    public static func __snapshotInline<Value>(
         _ value: Value,
         as strategy: Test.Snapshot.Strategy<Value, Swift.String>,
         record recording: Test.Snapshot.Recording? = nil,
@@ -105,7 +105,7 @@ extension Testing {
 
     /// Bridge for `#snapshot` inline expansion (async).
     @discardableResult
-    public static func __snapshotInline<Value: Sendable>(
+    public static func __snapshotInline<Value>(
         _ value: Value,
         as strategy: Test.Snapshot.Strategy<Value, Swift.String>,
         record recording: Test.Snapshot.Recording? = nil,
@@ -135,7 +135,7 @@ extension Testing {
 
     /// Bridge for `#snapshot` file-backed expansion (sync).
     @discardableResult
-    public static func __snapshotFile<Value: Sendable, Format: Sendable>(
+    public static func __snapshotFile<Value, Format: Sendable>(
         _ value: Value,
         as strategy: Test.Snapshot.Strategy<Value, Format>,
         named name: Swift.String,
@@ -163,7 +163,7 @@ extension Testing {
 
     /// Bridge for `#snapshot` file-backed expansion (async).
     @discardableResult
-    public static func __snapshotFile<Value: Sendable, Format: Sendable>(
+    public static func __snapshotFile<Value, Format: Sendable>(
         _ value: Value,
         as strategy: Test.Snapshot.Strategy<Value, Format>,
         named name: Swift.String,
