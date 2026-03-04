@@ -44,8 +44,6 @@ let package = Package(
         .package(path: "../swift-effects"),
         // Witness system (mode context for test/live execution)
         .package(path: "../swift-witnesses"),
-        // Console output (terminal capability detection, ANSI styling)
-        .package(path: "../swift-console"),
         // Macro implementation
         .package(url: "https://github.com/swiftlang/swift-syntax", "602.0.0"..<"603.0.0")
     ],
@@ -73,6 +71,7 @@ let package = Package(
             name: "Testing Core",
             dependencies: [
                 .product(name: "Tests", package: "swift-tests"),
+                .product(name: "Tests Reporter", package: "swift-tests"),
                 .product(name: "Tests Inline Snapshot", package: "swift-tests"),
                 .product(name: "Test Primitives", package: "swift-test-primitives"),
                 .product(name: "Standard Library Extensions", package: "swift-standard-library-extensions"),
@@ -82,7 +81,6 @@ let package = Package(
                 .product(name: "Loader", package: "swift-loader"),
                 .product(name: "Dependencies", package: "swift-dependencies"),
                 .product(name: "Witnesses", package: "swift-witnesses"),
-                .product(name: "Console", package: "swift-console")
             ],
             path: "Sources/Testing"
         ),
