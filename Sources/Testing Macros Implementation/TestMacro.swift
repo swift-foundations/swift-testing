@@ -45,8 +45,9 @@ public struct TestMacro: PeerMacro {
         let accessorName = context.makeUniqueName("accessor_\(normalizedName)")
         let recordName = context.makeUniqueName("record_\(normalizedName)")
 
-        // Extract traits from macro arguments
+        // Extract traits and arguments from macro arguments
         let traits = extractTraits(from: node)
+        let argumentsExpr = extractArguments(from: node)
 
         // Determine if async/throws
         let isAsync = funcDecl.signature.effectSpecifiers?.asyncSpecifier != nil
@@ -78,7 +79,35 @@ public struct TestMacro: PeerMacro {
         // TokenSyntax interpolation into ExprSyntax silently drops backtick-escaped
         // identifiers with spaces; trimmedDescription preserves them correctly.
         let bodyExpr: ExprSyntax
-        if let typeInfo = typeInfo {
+
+        // Parametric test: @Test(arguments: collection)
+        // Generates a loop that calls the function once per element.
+        if let argumentsExpr,
+           let firstParam = funcDecl.signature.parameterClause.parameters.first {
+            let paramLabel: String
+            if firstParam.firstName.tokenKind == .wildcard {
+                paramLabel = ""
+            } else {
+                paramLabel = "\(firstParam.firstName.trimmedDescription): "
+            }
+
+            let argsSource = argumentsExpr.trimmedDescription
+
+            if let typeInfo {
+                let typeRef = typeInfo.ref
+                if isAsync {
+                    bodyExpr = "Testing.__TestBody.async { let instance = \(raw: typeRef)(); for __arg in \(raw: argsSource) { \(raw: tryKeyword)await instance.\(raw: funcRef)(\(raw: paramLabel)__arg) } }"
+                } else {
+                    bodyExpr = "Testing.__TestBody.sync { let instance = \(raw: typeRef)(); for __arg in \(raw: argsSource) { \(raw: tryKeyword)instance.\(raw: funcRef)(\(raw: paramLabel)__arg) } }"
+                }
+            } else {
+                if isAsync {
+                    bodyExpr = "Testing.__TestBody.async { for __arg in \(raw: argsSource) { \(raw: tryKeyword)await \(raw: funcRef)(\(raw: paramLabel)__arg) } }"
+                } else {
+                    bodyExpr = "Testing.__TestBody.sync { for __arg in \(raw: argsSource) { \(raw: tryKeyword)\(raw: funcRef)(\(raw: paramLabel)__arg) } }"
+                }
+            }
+        } else if let typeInfo {
             let typeRef = typeInfo.ref
             if isAsync {
                 bodyExpr = "Testing.__TestBody.async { let instance = \(raw: typeRef)(); \(raw: tryKeyword)await instance.\(raw: funcRef)() }"
@@ -168,12 +197,21 @@ public struct TestMacro: PeerMacro {
             return "[]"
         }
 
-        let traitExprs = arguments.map { $0.expression.description }
+        let traitExprs = arguments
+            .filter { $0.label?.text != "arguments" }
+            .map { $0.expression.description }
         if traitExprs.isEmpty {
             return "[]"
         }
 
         return "[\(traitExprs.joined(separator: ", "))]"
+    }
+
+    private static func extractArguments(from node: AttributeSyntax) -> ExprSyntax? {
+        guard let arguments = node.arguments?.as(LabeledExprListSyntax.self) else {
+            return nil
+        }
+        return arguments.first(where: { $0.label?.text == "arguments" })?.expression
     }
 }
 

@@ -40,3 +40,31 @@ public macro Test(_ traits: Test.Trait.Collection.Modifier...) = #externalMacro(
     module: "Testing_Macros_Implementation",
     type: "TestMacro"
 )
+
+/// Marks a function as a parametric test that runs once per argument.
+///
+/// The function must accept a single parameter matching the element type
+/// of the provided collection.
+///
+/// ## Usage
+///
+/// ```swift
+/// @Test(arguments: Bool?.allCases)
+/// func validation(condition: Bool?) throws {
+///     // Runs 3 times: true, false, nil
+/// }
+///
+/// @Test(arguments: MyType.allCases)
+/// func exhaustive(arguments: MyType.Arguments) throws {
+///     let result = try MyType(arguments)
+///     // ...
+/// }
+/// ```
+@attached(peer, names: prefixed(__swift_test_accessor_), prefixed(__swift_test_record_))
+public macro Test(
+    _ traits: Test.Trait.Collection.Modifier...,
+    arguments collection: Any
+) = #externalMacro(
+    module: "Testing_Macros_Implementation",
+    type: "TestMacro"
+)
