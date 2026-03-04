@@ -45,9 +45,10 @@ public struct TestMacro: PeerMacro {
         let accessorName = context.makeUniqueName("accessor_\(normalizedName)")
         let recordName = context.makeUniqueName("record_\(normalizedName)")
 
-        // Extract traits and arguments from macro arguments
+        // Extract traits and argument collections from macro arguments.
+        // For @Test("name", arguments: c1, c2), traits = ["name"], argCollections = [c1, c2].
         let traits = extractTraits(from: node)
-        let argumentsExpr = extractArguments(from: node)
+        let argCollections = extractArgumentCollections(from: node)
 
         // Determine if async/throws
         let isAsync = funcDecl.signature.effectSpecifiers?.asyncSpecifier != nil
@@ -79,32 +80,31 @@ public struct TestMacro: PeerMacro {
         // TokenSyntax interpolation into ExprSyntax silently drops backtick-escaped
         // identifiers with spaces; trimmedDescription preserves them correctly.
         let bodyExpr: ExprSyntax
+        let funcParams = Array(funcDecl.signature.parameterClause.parameters)
 
-        // Parametric test: @Test(arguments: collection)
-        // Generates a loop that calls the function once per element.
-        if let argumentsExpr,
-           let firstParam = funcDecl.signature.parameterClause.parameters.first {
-            let paramLabel: String
-            if firstParam.firstName.tokenKind == .wildcard {
-                paramLabel = ""
-            } else {
-                paramLabel = "\(firstParam.firstName.trimmedDescription): "
-            }
-
-            let argsSource = argumentsExpr.trimmedDescription
+        // Parametric test: @Test(arguments: collection) or @Test(arguments: c1, c2)
+        // Single collection: generates a for-loop calling the function once per element.
+        // Multiple collections: generates nested for-loops (Cartesian product).
+        if !argCollections.isEmpty, !funcParams.isEmpty {
+            let callArgs = buildParametricCallArgs(funcParams: funcParams, argCollections: argCollections)
+            let loopOpen = buildLoopOpening(argCollections: argCollections)
+            let loopClose = String(repeating: " }", count: argCollections.count)
+            let awaitKeyword = isAsync ? "await " : ""
 
             if let typeInfo {
                 let typeRef = typeInfo.ref
+                let body = "let instance = \(typeRef)(); \(loopOpen)\(tryKeyword)\(awaitKeyword)instance.\(funcRef)(\(callArgs))\(loopClose)"
                 if isAsync {
-                    bodyExpr = "Testing.__TestBody.async { let instance = \(raw: typeRef)(); for __arg in \(raw: argsSource) { \(raw: tryKeyword)await instance.\(raw: funcRef)(\(raw: paramLabel)__arg) } }"
+                    bodyExpr = "Testing.__TestBody.async { \(raw: body) }"
                 } else {
-                    bodyExpr = "Testing.__TestBody.sync { let instance = \(raw: typeRef)(); for __arg in \(raw: argsSource) { \(raw: tryKeyword)instance.\(raw: funcRef)(\(raw: paramLabel)__arg) } }"
+                    bodyExpr = "Testing.__TestBody.sync { \(raw: body) }"
                 }
             } else {
+                let body = "\(loopOpen)\(tryKeyword)\(awaitKeyword)\(funcRef)(\(callArgs))\(loopClose)"
                 if isAsync {
-                    bodyExpr = "Testing.__TestBody.async { for __arg in \(raw: argsSource) { \(raw: tryKeyword)await \(raw: funcRef)(\(raw: paramLabel)__arg) } }"
+                    bodyExpr = "Testing.__TestBody.async { \(raw: body) }"
                 } else {
-                    bodyExpr = "Testing.__TestBody.sync { for __arg in \(raw: argsSource) { \(raw: tryKeyword)\(raw: funcRef)(\(raw: paramLabel)__arg) } }"
+                    bodyExpr = "Testing.__TestBody.sync { \(raw: body) }"
                 }
             }
         } else if let typeInfo {
@@ -192,26 +192,74 @@ public struct TestMacro: PeerMacro {
         return [accessor, record, container]
     }
 
+    /// Extracts trait expressions from macro arguments.
+    ///
+    /// Everything before the `arguments:` label is a trait.
+    /// The `arguments:` expression and everything after it are argument collections.
     private static func extractTraits(from node: AttributeSyntax) -> String {
         guard let arguments = node.arguments?.as(LabeledExprListSyntax.self) else {
             return "[]"
         }
 
-        let traitExprs = arguments
-            .filter { $0.label?.text != "arguments" }
-            .map { $0.expression.description }
-        if traitExprs.isEmpty {
-            return "[]"
+        var traitExprs: [String] = []
+        for arg in arguments {
+            if arg.label?.text == "arguments" { break }
+            traitExprs.append(arg.expression.description)
         }
-
+        if traitExprs.isEmpty { return "[]" }
         return "[\(traitExprs.joined(separator: ", "))]"
     }
 
-    private static func extractArguments(from node: AttributeSyntax) -> ExprSyntax? {
+    /// Extracts argument collection expressions from macro arguments.
+    ///
+    /// Returns all expressions starting from the `arguments:` labeled argument,
+    /// including subsequent unlabeled arguments (for Cartesian product).
+    ///
+    /// - `@Test(arguments: c1)` → `[c1]`
+    /// - `@Test("name", arguments: c1, c2)` → `[c1, c2]`
+    private static func extractArgumentCollections(from node: AttributeSyntax) -> [ExprSyntax] {
         guard let arguments = node.arguments?.as(LabeledExprListSyntax.self) else {
-            return nil
+            return []
         }
-        return arguments.first(where: { $0.label?.text == "arguments" })?.expression
+
+        var found = false
+        var collections: [ExprSyntax] = []
+        for arg in arguments {
+            if arg.label?.text == "arguments" { found = true }
+            if found { collections.append(arg.expression) }
+        }
+        return collections
+    }
+
+    /// Builds the for-loop opening for parametric tests.
+    ///
+    /// Single collection: `for __arg0 in collection {`
+    /// Multiple: `for __arg0 in c1 { for __arg1 in c2 {`
+    private static func buildLoopOpening(argCollections: [ExprSyntax]) -> String {
+        argCollections.enumerated().map { index, expr in
+            "for __arg\(index) in \(expr.trimmedDescription) {"
+        }.joined(separator: " ")
+    }
+
+    /// Builds the function call arguments for parametric tests.
+    ///
+    /// Maps each function parameter to its corresponding `__argN` variable.
+    /// Uses the parameter's external name as the label.
+    private static func buildParametricCallArgs(
+        funcParams: [FunctionParameterSyntax],
+        argCollections: [ExprSyntax]
+    ) -> String {
+        let count = min(funcParams.count, argCollections.count)
+        return (0..<count).map { index in
+            let param = funcParams[index]
+            let label: String
+            if param.firstName.tokenKind == .wildcard {
+                label = ""
+            } else {
+                label = "\(param.firstName.trimmedDescription): "
+            }
+            return "\(label)__arg\(index)"
+        }.joined(separator: ", ")
     }
 }
 

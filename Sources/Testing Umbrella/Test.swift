@@ -68,3 +68,25 @@ public macro Test(
     module: "Testing_Macros_Implementation",
     type: "TestMacro"
 )
+
+/// Marks a function as a parametric test over the Cartesian product of two collections.
+///
+/// The function must accept two parameters, one for each collection's element type.
+///
+/// ## Usage
+///
+/// ```swift
+/// @Test("Lid 1", arguments: Bool?.allCases, Bool?.allCases)
+/// func lid1(condition1: Bool?, condition2: Bool?) {
+///     // Runs 9 times: all combinations of [true, false, nil] × [true, false, nil]
+/// }
+/// ```
+@attached(peer, names: prefixed(__swift_test_accessor_), prefixed(__swift_test_record_))
+public macro Test(
+    _ traits: Test.Trait.Collection.Modifier...,
+    arguments collection1: Any,
+    _ collection2: Any
+) = #externalMacro(
+    module: "Testing_Macros_Implementation",
+    type: "TestMacro"
+)
