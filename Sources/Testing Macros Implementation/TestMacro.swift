@@ -245,10 +245,33 @@ public struct TestMacro: PeerMacro {
     ///
     /// Maps each function parameter to its corresponding `__argN` variable.
     /// Uses the parameter's external name as the label.
+    ///
+    /// When a single argument collection is used with multiple function parameters,
+    /// tuple destructuring is applied: the collection elements are accessed as
+    /// `__arg0.0`, `__arg0.1`, etc.
+    ///
+    /// - `@Test(arguments: [1, 2])` with `func test(n: Int)` → `test(n: __arg0)`
+    /// - `@Test(arguments: [("a", 1)])` with `func test(s: String, n: Int)` → `test(s: __arg0.0, n: __arg0.1)`
+    /// - `@Test(arguments: c1, c2)` with `func test(a: Int, b: Int)` → `test(a: __arg0, b: __arg1)`
     private static func buildParametricCallArgs(
         funcParams: [FunctionParameterSyntax],
         argCollections: [ExprSyntax]
     ) -> String {
+        // Tuple destructuring: single collection with multiple function parameters.
+        if argCollections.count == 1, funcParams.count > 1 {
+            return (0..<funcParams.count).map { index in
+                let param = funcParams[index]
+                let label: String
+                if param.firstName.tokenKind == .wildcard {
+                    label = ""
+                } else {
+                    label = "\(param.firstName.trimmedDescription): "
+                }
+                return "\(label)__arg0.\(index)"
+            }.joined(separator: ", ")
+        }
+
+        // Standard: one collection per parameter (including Cartesian product).
         let count = min(funcParams.count, argCollections.count)
         return (0..<count).map { index in
             let param = funcParams[index]
