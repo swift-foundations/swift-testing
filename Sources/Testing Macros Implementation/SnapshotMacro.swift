@@ -14,32 +14,31 @@ import SwiftSyntaxMacros
 
 /// Implementation of the `#snapshot` macro.
 ///
-/// Dispatches to inline or file-backed bridge based on syntax:
+/// The canonical syntax is configuration-first, value as trailing closure:
 ///
-/// - `named:` present + trailing closure → compile error
-/// - `named:` present → `Testing.__snapshotFile(...)`
-/// - Otherwise → `Testing.__snapshotInline(...)`, forwarding trailing closure as `matches:`
+/// ```swift
+/// #snapshot(as: .html) { value }
+/// #snapshot(as: .html) { value } matches: { expected }
+/// #snapshot(as: .json, named: "x") { value }
+/// ```
+///
+/// The trailing closure provides the value. When recorded, a `matches:`
+/// additional trailing closure is added with the expected value.
 public struct SnapshotMacro: ExpressionMacro {
     public static func expansion(
         of node: some FreestandingMacroExpansionSyntax,
         in context: some MacroExpansionContext
     ) throws -> ExprSyntax {
-        var valueExpr: ExprSyntax?
         var strategyExpr: ExprSyntax?
         var nameExpr: Swift.String?
         var recordExpr: Swift.String?
         var redactingExpr: Swift.String = "[]"
-        var matchesExpr: Swift.String?
 
         for argument in node.arguments {
             let label = argument.label?.text
             let expr = argument.expression
 
             switch label {
-            case nil:
-                if valueExpr == nil {
-                    valueExpr = expr
-                }
             case "as":
                 strategyExpr = expr
             case "named":
@@ -48,36 +47,47 @@ public struct SnapshotMacro: ExpressionMacro {
                 recordExpr = expr.description
             case "redacting":
                 redactingExpr = expr.description
-            case "matches":
-                matchesExpr = expr.description
             default:
                 break
             }
-        }
-
-        guard let value = valueExpr else {
-            throw Error.missingValue
         }
 
         guard let strategy = strategyExpr else {
             throw Error.missingStrategy
         }
 
-        let hasTrailingClosure = node.trailingClosure != nil
-        let hasName = nameExpr != nil
-
-        let hasMatches = hasTrailingClosure || matchesExpr != nil
-
-        if hasName && hasMatches {
-            throw Error.namedWithTrailingClosure
+        guard let trailingClosure = node.trailingClosure else {
+            throw Error.missingValue
         }
 
+        // Extract value expression from trailing closure.
+        // Single expression: use directly. Multi-statement: wrap in IIFE.
+        let valueExpr: ExprSyntax = {
+            let statements = trailingClosure.statements
+            if statements.count == 1,
+               let single = statements.first,
+               case .expr(let expr) = single.item {
+                return expr
+            }
+            return "({ \(statements) }())"
+        }()
+
+        let hasName = nameExpr != nil
         let recordArg = recordExpr.map { "record: \($0)," } ?? ""
+
+        // Check for `matches:` in additional trailing closures.
+        let matchesClosure = node.additionalTrailingClosures.first(
+            where: { $0.label.text == "matches" }
+        )
+
+        if hasName && matchesClosure != nil {
+            throw Error.namedWithMatches
+        }
 
         if hasName {
             return """
                 Testing.__snapshotFile(
-                    \(value),
+                    \(valueExpr),
                     as: \(strategy),
                     named: \(raw: nameExpr!),
                     \(raw: recordArg)
@@ -91,17 +101,15 @@ public struct SnapshotMacro: ExpressionMacro {
                 """
         } else {
             let matches: Swift.String
-            if let trailingClosure = node.trailingClosure {
-                matches = "{ \(trailingClosure.statements) }"
-            } else if let labeled = matchesExpr {
-                matches = labeled
+            if let matchesClosure {
+                matches = "{ \(matchesClosure.closure.statements) }"
             } else {
                 matches = "nil"
             }
 
             return """
                 Testing.__snapshotInline(
-                    \(value),
+                    \(valueExpr),
                     as: \(strategy),
                     \(raw: recordArg)
                     redacting: \(raw: redactingExpr),
@@ -121,16 +129,16 @@ extension SnapshotMacro {
     enum Error: Swift.Error, CustomStringConvertible {
         case missingValue
         case missingStrategy
-        case namedWithTrailingClosure
+        case namedWithMatches
 
         var description: Swift.String {
             switch self {
             case .missingValue:
-                return "#snapshot requires a value to snapshot"
+                return "#snapshot requires a trailing closure producing the value to snapshot"
             case .missingStrategy:
-                return "#snapshot requires a strategy (as: .lines, .text, .json, etc.)"
-            case .namedWithTrailingClosure:
-                return "#snapshot with 'named:' uses file-backed storage. Remove the trailing closure, or remove 'named:' to use inline comparison."
+                return "#snapshot requires a strategy (as: .lines, .text, .json, .html, etc.)"
+            case .namedWithMatches:
+                return "#snapshot with 'named:' uses file-backed storage. Remove the 'matches:' closure, or remove 'named:' to use inline comparison."
             }
         }
     }

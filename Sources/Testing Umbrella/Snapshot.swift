@@ -13,25 +13,23 @@ import Tests_Inline_Snapshot
 
 /// Asserts that a value matches its snapshot.
 ///
-/// Dispatches to inline or file-backed comparison based on parameters:
-///
-/// | `named:` | Trailing closure | Behavior |
-/// |----------|-----------------|----------|
-/// | absent   | absent          | Inline record (capture and rewrite source) |
-/// | absent   | present         | Inline compare (compare against closure) |
-/// | present  | absent          | File-backed (compare against named file) |
-/// | present  | present         | **Compile error** |
+/// Configuration goes first, value as trailing closure, expected as
+/// `matches:` additional trailing closure.
 ///
 /// ## Inline Snapshot
 ///
 /// ```swift
 /// // First run — records and rewrites source:
-/// #snapshot(error.description, as: .lines)
+/// #snapshot(as: .html) {
+///     VStack { div { "Hello" } }
+/// }
 ///
 /// // After recording, source becomes:
-/// #snapshot(error.description, as: .lines) {
+/// #snapshot(as: .html) {
+///     VStack { div { "Hello" } }
+/// } matches: {
 ///     """
-///     Something went wrong
+///     <div>...</div>
 ///     """
 /// }
 /// ```
@@ -39,31 +37,45 @@ import Tests_Inline_Snapshot
 /// ## File-Backed Snapshot
 ///
 /// ```swift
-/// #snapshot(user, as: .json, named: "user-profile")
+/// #snapshot(as: .json, named: "user-profile") {
+///     user
+/// }
 /// ```
 ///
 /// ## Recording Mode Override
 ///
 /// ```swift
-/// #snapshot(output, as: .lines, record: .all)
+/// #snapshot(as: .lines, record: .all) {
+///     output
+/// }
 /// ```
 ///
 /// - Parameters:
-///   - value: The value to snapshot.
 ///   - strategy: How to convert and compare the value.
-///   - name: File-backed storage name. Mutually exclusive with trailing closure.
+///   - name: File-backed storage name. Mutually exclusive with `matches:`.
 ///   - record: Recording mode override (`.all`, `.missing`, `.failed`, `.never`).
 ///   - redactions: Redaction rules applied before comparison.
-///   - expected: Trailing closure with expected inline value.
 /// - Returns: The snapshot expectation result.
+///
 @freestanding(expression)
 public macro snapshot<Value, Format>(
-    _ value: Value,
     as strategy: Test.Snapshot.Strategy<Value, Format>,
     named name: Swift.String? = nil,
     record recording: Test.Snapshot.Recording? = nil,
     redacting redactions: [Test.Snapshot.Redaction<Format>] = [],
-    matches expected: (() -> Swift.String)? = nil
+    _ value: () -> Value
+) -> Test.Expectation = #externalMacro(
+    module: "Testing_Macros_Implementation",
+    type: "SnapshotMacro"
+)
+
+@freestanding(expression)
+public macro snapshot<Value>(
+    as strategy: Test.Snapshot.Strategy<Value, Swift.String>,
+    record recording: Test.Snapshot.Recording? = nil,
+    redacting redactions: [Test.Snapshot.Redaction<Swift.String>] = [],
+    _ value: () -> Value,
+    matches expected: () -> Swift.String
 ) -> Test.Expectation = #externalMacro(
     module: "Testing_Macros_Implementation",
     type: "SnapshotMacro"
