@@ -27,6 +27,9 @@
 // Re-export runner infrastructure
 @_exported public import Tests
 
+// Re-export snapshot assertion functions
+@_exported public import Tests_Inline_Snapshot
+
 // Re-export core implementation
 @_exported public import Testing_Core
 

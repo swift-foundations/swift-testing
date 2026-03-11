@@ -86,12 +86,12 @@ public struct SnapshotMacro: ExpressionMacro {
 
         if hasName {
             return """
-                Testing.__snapshotFile(
-                    \(valueExpr),
+                snapshot(
                     as: \(strategy),
                     named: \(raw: nameExpr!),
                     \(raw: recordArg)
                     redacting: \(raw: redactingExpr),
+                    { \(valueExpr) },
                     fileID: #fileID,
                     filePath: #filePath,
                     line: #line,
@@ -108,11 +108,11 @@ public struct SnapshotMacro: ExpressionMacro {
             }
 
             return """
-                Testing.__snapshotInline(
-                    \(valueExpr),
+                snapshot(
                     as: \(strategy),
                     \(raw: recordArg)
                     redacting: \(raw: redactingExpr),
+                    { \(valueExpr) },
                     matches: \(raw: matches),
                     fileID: #fileID,
                     filePath: #filePath,
