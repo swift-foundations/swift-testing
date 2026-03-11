@@ -2,7 +2,7 @@
 //
 // This source file is part of the swift-testing open source project
 //
-// Copyright (c) 2024-2025 Coen ten Thije Boonkkamp and the swift-testing project authors
+// Copyright (c) 2024-2026 Coen ten Thije Boonkkamp and the swift-testing project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE for license information
@@ -26,24 +26,20 @@ import SwiftSyntaxMacros
 ///     @Test func subtraction() { ... }
 /// }
 /// ```
-public struct SuiteMacro: MemberMacro, MemberAttributeMacro {
-    // MARK: - MemberMacro
-
+public struct SuiteMacro: MemberMacro {
     public static func expansion(
         of node: AttributeSyntax,
         providingMembersOf declaration: some DeclGroupSyntax,
         conformingTo protocols: [TypeSyntax],
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
-        let typeName = extractTypeName(from: declaration)
+        let typeName = typeName(from: declaration)
 
-        // Generate unique names using the macro context
         let accessorName = context.makeUniqueName("suite_accessor")
         let recordName = context.makeUniqueName("suite_record")
 
-        let traits = extractTraits(from: node)
+        let traits = Testing_Macros_Implementation.extractTraits(from: node, stopAtArguments: false)
 
-        // 1. Generate the accessor as a static nonisolated let with a closure
         let accessor: DeclSyntax = """
             @available(*, deprecated, message: "This is an implementation detail of the testing library. Do not use it directly.")
             private nonisolated static let \(accessorName): Testing.__TestContentRecordAccessor = { outValue, type, _, _ in
@@ -70,63 +66,19 @@ public struct SuiteMacro: MemberMacro, MemberAttributeMacro {
             }
             """
 
-        // 2. Generate the section record
-        let record: DeclSyntax = """
-            #if hasFeature(SymbolLinkageMarkers)
-            #if os(macOS) || os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
-            @_section("__DATA_CONST,__swift5_tests")
-            #elseif os(Linux) || os(FreeBSD) || os(OpenBSD) || os(Android)
-            @_section("swift5_tests")
-            #elseif os(Windows)
-            @_section(".sw5test$B")
-            #endif
-            @_used
-            #endif
-            @available(*, deprecated, message: "This is an implementation detail of the testing library. Do not use it directly.")
-            private nonisolated static let \(recordName): Testing.__TestContentRecord = (
-                Testing.__TestContentKind.suite.rawValue,
-                0,
-                unsafe \(accessorName),
-                0,
-                0
-            )
-            """
+        let record = sectionRecord(
+            kind: "suite",
+            accessorName: accessorName,
+            recordName: recordName,
+            isStatic: true
+        )
 
-        // 3. Generate legacy container enum for pre-6.3 discovery.
-        let containerName = context.makeUniqueName("__🟡$_suite")
-        let container: DeclSyntax = """
-            #if compiler(<6.3)
-            @available(*, deprecated, message: "This type is an implementation detail of the testing library. Do not use it directly.")
-            private enum \(containerName): Testing.__TestContentRecordContainer {
-                nonisolated static let __testContentRecord: Testing.__TestContentRecord = \(recordName)
-            }
-            #endif
-            """
-
-        return [accessor, record, container]
-    }
-
-    // MARK: - MemberAttributeMacro
-
-    public static func expansion(
-        of node: AttributeSyntax,
-        attachedTo declaration: some DeclGroupSyntax,
-        providingAttributesFor member: some DeclSyntaxProtocol,
-        in context: some MacroExpansionContext
-    ) throws -> [AttributeSyntax] {
-        // Don't add attributes to non-function members
-        guard member.is(FunctionDeclSyntax.self) else {
-            return []
-        }
-
-        // Don't add @Test to functions that already have it
-        // This is a simplified check - production would be more thorough
-        return []
+        return [accessor, record]
     }
 
     // MARK: - Helpers
 
-    private static func extractTypeName(from declaration: some DeclGroupSyntax) -> String {
+    private static func typeName(from declaration: some DeclGroupSyntax) -> String {
         if let structDecl = declaration.as(StructDeclSyntax.self) {
             return structDecl.name.text
         } else if let classDecl = declaration.as(ClassDeclSyntax.self) {
@@ -135,18 +87,5 @@ public struct SuiteMacro: MemberMacro, MemberAttributeMacro {
             return enumDecl.name.text
         }
         return "Unknown"
-    }
-
-    private static func extractTraits(from node: AttributeSyntax) -> String {
-        guard let arguments = node.arguments?.as(LabeledExprListSyntax.self) else {
-            return "[]"
-        }
-
-        let traitExprs = arguments.map { $0.expression.description }
-        if traitExprs.isEmpty {
-            return "[]"
-        }
-
-        return "[\(traitExprs.joined(separator: ", "))]"
     }
 }

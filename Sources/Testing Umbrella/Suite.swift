@@ -36,7 +36,6 @@
 /// }
 /// ```
 @attached(member, names: prefixed(__swift_suite_factory_))
-@attached(memberAttribute)
 public macro Suite(_ traits: Test.Trait.Collection.Modifier...) = #externalMacro(
     module: "Testing_Macros_Implementation",
     type: "SuiteMacro"

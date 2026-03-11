@@ -131,18 +131,6 @@ final class DiscoveryTests: XCTestCase {
     }
 }
 
-// MARK: - Reporter Tests
-
-final class ReporterTests: XCTestCase {
-    func testConsoleFactoryCreatesAReporter() {
-        Testing.Reporter.Test.Unit().consoleFactoryCreatesAReporter()
-    }
-
-    func testJsonFactoryWithNilPathCreatesAReporter() {
-        Testing.Reporter.Test.Unit().jsonFactoryWithNilPathCreatesAReporter()
-    }
-}
-
 // MARK: - Macro Compilation Tests
 
 final class MacroCompilationXCTests: XCTestCase {

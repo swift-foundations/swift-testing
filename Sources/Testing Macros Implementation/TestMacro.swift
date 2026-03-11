@@ -47,7 +47,7 @@ public struct TestMacro: PeerMacro {
 
         // Extract traits and argument collections from macro arguments.
         // For @Test("name", arguments: c1, c2), traits = ["name"], argCollections = [c1, c2].
-        let traits = extractTraits(from: node)
+        let traits = Testing_Macros_Implementation.extractTraits(from: node, stopAtArguments: true)
         let argCollections = extractArgumentCollections(from: node)
 
         // Determine if async/throws
@@ -154,60 +154,14 @@ public struct TestMacro: PeerMacro {
             """
 
         // 2. Generate the section record
-        let record: DeclSyntax = """
-            #if hasFeature(SymbolLinkageMarkers)
-            #if os(macOS) || os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
-            @_section("__DATA_CONST,__swift5_tests")
-            #elseif os(Linux) || os(FreeBSD) || os(OpenBSD) || os(Android)
-            @_section("swift5_tests")
-            #elseif os(Windows)
-            @_section(".sw5test$B")
-            #endif
-            @_used
-            #endif
-            @available(*, deprecated, message: "This is an implementation detail of the testing library. Do not use it directly.")
-            private \(raw: staticKeyword)nonisolated let \(recordName): Testing.__TestContentRecord = (
-                Testing.__TestContentKind.test.rawValue,
-                0,
-                unsafe \(accessorName),
-                0,
-                0
-            )
-            """
+        let record = sectionRecord(
+            kind: "test",
+            accessorName: accessorName,
+            recordName: recordName,
+            isStatic: typeInfo != nil
+        )
 
-        // 3. Generate legacy container enum for pre-6.3 discovery.
-        // The compiler always places type metadata in __swift5_types, so
-        // discovery can find this enum by scanning for types named __🟡$...
-        // and casting to __TestContentRecordContainer.
-        let containerName = context.makeUniqueName("__🟡$_\(normalizedName)")
-        let container: DeclSyntax = """
-            #if compiler(<6.3)
-            @available(*, deprecated, message: "This type is an implementation detail of the testing library. Do not use it directly.")
-            private enum \(containerName): Testing.__TestContentRecordContainer {
-                nonisolated static let __testContentRecord: Testing.__TestContentRecord = \(recordName)
-            }
-            #endif
-            """
-
-        return [accessor, record, container]
-    }
-
-    /// Extracts trait expressions from macro arguments.
-    ///
-    /// Everything before the `arguments:` label is a trait.
-    /// The `arguments:` expression and everything after it are argument collections.
-    private static func extractTraits(from node: AttributeSyntax) -> String {
-        guard let arguments = node.arguments?.as(LabeledExprListSyntax.self) else {
-            return "[]"
-        }
-
-        var traitExprs: [String] = []
-        for arg in arguments {
-            if arg.label?.text == "arguments" { break }
-            traitExprs.append(arg.expression.description)
-        }
-        if traitExprs.isEmpty { return "[]" }
-        return "[\(traitExprs.joined(separator: ", "))]"
+        return [accessor, record]
     }
 
     /// Extracts argument collection expressions from macro arguments.
@@ -291,14 +245,11 @@ public struct TestMacro: PeerMacro {
 extension TestMacro {
     enum Error: Swift.Error, CustomStringConvertible {
         case requiresFunction
-        case requiresStruct
 
         var description: String {
             switch self {
             case .requiresFunction:
                 return "@Test can only be applied to functions"
-            case .requiresStruct:
-                return "@Suite can only be applied to structs or classes"
             }
         }
     }

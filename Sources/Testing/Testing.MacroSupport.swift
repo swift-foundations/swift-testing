@@ -54,9 +54,6 @@ extension Testing {
     /// Unambiguous reference to Test.Trait.Collection.Modifier for macro expansions.
     public typealias __TestTraitCollectionModifier = Test.Trait.Collection.Modifier
 
-    /// Unambiguous reference to Test.__TestContentRecordContainer for macro expansions.
-    public typealias __TestContentRecordContainer = Test.__TestContentRecordContainer
-
     /// Box type for passing registrations through C-convention accessors.
     /// Delegates to Test.Box (= Ownership.Shared) so macro-generated code
     /// and section-based discovery use the same concrete type.

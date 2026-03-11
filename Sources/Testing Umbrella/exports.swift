@@ -12,29 +12,12 @@
 // MARK: - Umbrella Module Exports
 //
 // This module is what users import as "Testing".
-// It re-exports everything needed for a complete testing experience:
-// - Test namespace (Test.ID, Test.Trait, etc.) from Test_Primitives
-// - Runner infrastructure (Test.Runner, Test.Plan, etc.) from Tests
-// - Core implementation (Testing.main, Testing.Discovery, etc.) from Testing Core
-// - Macro testing utilities (assertMacroExpansion) from SwiftSyntax
-//
-// The macro declarations are also in this module (at file scope),
-// which ensures @Test and Test.* coexist without collision.
+// Testing_Core transitively provides: Test_Primitives, Tests (which
+// includes Tests_Inline_Snapshot, Tests_Snapshot, Tests_Performance),
+// Dependencies, and Time_Primitives.
 
-// Re-export Test namespace and all test primitive types
-@_exported public import Test_Primitives
-
-// Re-export runner infrastructure
-@_exported public import Tests
-
-// Re-export snapshot assertion functions
-@_exported public import Tests_Inline_Snapshot
-
-// Re-export core implementation
+// Re-export core implementation (brings all testing infrastructure)
 @_exported public import Testing_Core
-
-// Re-export dependency injection for @Dependency, withDependencies, etc.
-@_exported public import Dependencies
 
 // Re-export SwiftSyntax types for macro testing
 // Users need: Macro, DiagnosticSpec, Trivia for assertMacroExpansion()

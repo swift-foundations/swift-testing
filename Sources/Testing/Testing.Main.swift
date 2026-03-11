@@ -23,9 +23,7 @@ extension Testing {
     ///
     /// - Returns: Never returns; exits the process.
     public static func __swiftPMEntryPoint() async -> Never {
-        let fallbackNames = Test.Manifest.factoryNames
-        let registry = Discovery.all(fallback: fallbackNames)
-        let hasFailures = await runReturningResult(registry: registry)
+        let hasFailures = await run(registry: Discovery.all())
         ISO_9945.Kernel.Process.Exit.now(hasFailures ? 1 : 0)
     }
 
@@ -59,22 +57,7 @@ extension Testing {
     /// - `SWIFT_TEST_OUTPUT`: "json" for JSON output
     /// - `SWIFT_TEST_OUTPUT_PATH`: File path for output
     public static func main() async {
-        // Primary: section-based discovery (automatic)
-        // Fallback: dlsym with manifest factory names
-        let fallbackNames = Test.Manifest.factoryNames
-        let registry = Discovery.all(fallback: fallbackNames)
-        await run(registry: registry)
-    }
-
-    /// Main entry point with explicit factory names.
-    ///
-    /// Use this overload when you have a known list of test factory symbols.
-    /// This bypasses section-based discovery and uses dlsym directly.
-    ///
-    /// - Parameter factories: List of factory symbol names to discover.
-    public static func main(factories: [Swift.String]) async {
-        let registry = Discovery.discover(factoryNames: factories)
-        await run(registry: registry)
+        await run(registry: Discovery.all())
     }
 
     /// Runs all discovered tests and returns whether any failed.
@@ -84,18 +67,12 @@ extension Testing {
     ///
     /// - Returns: `true` if any test failed, `false` if all passed.
     public static func run() async -> Bool {
-        let fallbackNames = Test.Manifest.factoryNames
-        let registry = Discovery.all(fallback: fallbackNames)
-        return await runReturningResult(registry: registry)
-    }
-
-    /// Internal runner that executes a test plan from a registry.
-    private static func run(registry: consuming Test.Plan.Registry) async {
-        _ = await runReturningResult(registry: registry)
+        await run(registry: Discovery.all())
     }
 
     /// Internal runner that executes a test plan and returns whether there were failures.
-    private static func runReturningResult(registry: consuming Test.Plan.Registry) async -> Bool {
+    @discardableResult
+    private static func run(registry: consuming Test.Plan.Registry) async -> Bool {
         let config = Configuration.current
 
         // Apply filters
@@ -108,9 +85,9 @@ extension Testing {
         let reporter: Test.Reporter
         switch config.output.format {
         case .console:
-            reporter = Testing.Reporter.console
+            reporter = .console
         case .json:
-            reporter = Testing.Reporter.json(to: config.output.path)
+            reporter = .json(to: config.output.path)
         }
 
         // Create and run the runner

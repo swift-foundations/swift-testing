@@ -10,7 +10,6 @@
 // ===----------------------------------------------------------------------===//
 
 public import Test_Primitives
-public import Ownership_Primitives
 
 // MARK: - Helpers for Macro Expansion
 
@@ -83,36 +82,5 @@ extension Testing {
             line: line,
             column: column
         )
-    }
-}
-
-// MARK: - Factory Registration Helper
-
-extension Testing {
-    /// Creates a boxed registration and returns it as an unsafe pointer.
-    ///
-    /// Used by @Test macro expansion to create factory functions.
-    ///
-    /// - Parameters:
-    ///   - id: Test identifier.
-    ///   - modifiers: Modifiers for the trait collection.
-    ///   - body: Test body.
-    ///   - suiteID: Optional suite identifier.
-    /// - Returns: Retained pointer to boxed registration.
-    @inlinable
-    public static func __createRegistration(
-        id: Test.ID,
-        modifiers: [Test.Trait.Collection.Modifier],
-        body: Test.Body,
-        suiteID: Swift.String? = nil
-    ) -> UnsafeRawPointer {
-        let registration = Test.Registration(
-            id: id,
-            modifiers: modifiers,
-            body: body,
-            suiteID: suiteID
-        )
-        let boxed = Test.Box(registration)
-        return unsafe UnsafeRawPointer(Unmanaged.passRetained(boxed).toOpaque())
     }
 }

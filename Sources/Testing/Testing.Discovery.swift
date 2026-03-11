@@ -136,112 +136,13 @@ extension Testing {
             }
         }
 
-        // MARK: - Legacy: Type Metadata-Based Discovery
-
-        /// Discovers tests and suites from type metadata (legacy, Swift < 6.3).
-        ///
-        /// Scans `__swift5_types` for enum types named `__🟡$...` that conform to
-        /// `__TestContentRecordContainer`. Each matching type's
-        /// `__testContentRecord` property provides a test content record tuple.
-        ///
-        /// - Returns: A registry containing all discovered tests and suites.
-        public static func typeMetadata() -> Test.Plan.Registry {
-            var registry = Test.Plan.Registry()
-
-            let types = Loader.types(named: "__🟡$")
-
-            for type in types {
-                guard let container = type as? any Test.__TestContentRecordContainer.Type else {
-                    continue
-                }
-
-                unsafe processRecord(container.__testContentRecord, into: &registry)
-            }
-
-            return registry
-        }
-
-        // MARK: - Fallback: Symbol-Based Discovery
-
-        /// Factory function signature for dlsym-based discovery.
-        public typealias Factory = @convention(c) () -> UnsafeRawPointer
-
-        /// Discovers all tests from factory symbol names (fallback).
-        ///
-        /// Uses dlsym to look up factory functions created by older
-        /// `@Test` macro expansions that use `@_cdecl`.
-        ///
-        /// - Parameter factoryNames: List of factory symbol names to look up.
-        /// - Returns: A registry containing all discovered tests.
-        public static func discover(
-            factoryNames: [Swift.String]
-        ) -> Test.Plan.Registry {
-            var registry = Test.Plan.Registry()
-
-            for name in factoryNames {
-                guard let ptr = unsafe lookupSymbol(name: name) else {
-                    continue
-                }
-
-                let factory = unsafe unsafeBitCast(ptr, to: Factory.self)
-                let boxedPtr = unsafe factory()
-
-                let reg = unsafe Ownership.Transfer.Retained<Test.Box<Test.Registration>>(boxedPtr).take().value
-                registry.add(id: reg.id, modifiers: reg.modifiers, body: reg.body)
-            }
-
-            return registry
-        }
-
-        /// Looks up a symbol by name in all loaded images.
-        ///
-        /// - Parameter name: The symbol name to look up.
-        /// - Returns: Pointer to the symbol, or nil if not found.
-        @usableFromInline
-        internal static func lookupSymbol(name: Swift.String) -> UnsafeRawPointer? {
-            do {
-                return try unsafe name.withCString { cName in
-                    try unsafe Loader.Symbol.lookup(name: cName, in: .default)
-                }
-            } catch {
-                return nil
-            }
-        }
-
         // MARK: - Unified Discovery
 
-        /// Discovers all tests using the best available method.
+        /// Discovers all tests using section-based enumeration.
         ///
-        /// Tries section-based discovery first, then falls back to
-        /// symbol-based discovery if no tests are found.
-        ///
-        /// - Parameter fallback: Factory names to try if section discovery fails.
-        /// - Returns: A registry containing all discovered tests.
-        public static func all(
-            fallback: [Swift.String] = []
-        ) -> Test.Plan.Registry {
-            // Try section-based discovery first (Swift 6.3+)
-            var registry = sections()
-
-            // Fall back to type-metadata discovery (Swift < 6.3)
-            if registry.isEmpty {
-                registry = typeMetadata()
-            }
-
-            // Final fallback: dlsym-based discovery
-            if registry.isEmpty && !fallback.isEmpty {
-                registry = discover(factoryNames: fallback)
-            }
-
-            return registry
+        /// - Returns: A registry containing all discovered tests and suites.
+        public static func all() -> Test.Plan.Registry {
+            sections()
         }
-    }
-}
-
-// MARK: - Registry isEmpty Check
-
-extension Test.Plan.Registry {
-    fileprivate var isEmpty: Bool {
-        count == 0
     }
 }

@@ -56,8 +56,6 @@ let package = Package(
             dependencies: [
                 "Testing Core",
                 "Testing Macros Implementation",
-                .product(name: "Test Primitives", package: "swift-test-primitives"),
-                .product(name: "Tests Inline Snapshot", package: "swift-tests"),
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacroExpansion", package: "swift-syntax"),
