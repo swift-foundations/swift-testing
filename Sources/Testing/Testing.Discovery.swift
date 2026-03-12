@@ -136,13 +136,47 @@ extension Testing {
             }
         }
 
+        // MARK: - Legacy: Type Metadata-Based Discovery
+
+        /// Discovers tests and suites from type metadata (legacy, Swift < 6.3).
+        ///
+        /// Scans `__swift5_types` for enum types named `__🟡$...` that conform to
+        /// `__TestContentRecordContainer`. Each matching type's
+        /// `__testContentRecord` property provides a test content record tuple.
+        ///
+        /// - Returns: A registry containing all discovered tests and suites.
+        public static func typeMetadata() -> Test.Plan.Registry {
+            var registry = Test.Plan.Registry()
+
+            let types = Loader.types(named: "__🟡$")
+
+            for type in types {
+                guard let container = type as? any Test.__TestContentRecordContainer.Type else {
+                    continue
+                }
+
+                unsafe processRecord(container.__testContentRecord, into: &registry)
+            }
+
+            return registry
+        }
+
         // MARK: - Unified Discovery
 
-        /// Discovers all tests using section-based enumeration.
+        /// Discovers all tests using the best available method.
+        ///
+        /// Tries section-based discovery first, then falls back to
+        /// type-metadata discovery if no tests are found (Swift < 6.3).
         ///
         /// - Returns: A registry containing all discovered tests and suites.
         public static func all() -> Test.Plan.Registry {
-            sections()
+            var registry = sections()
+
+            if registry.count == 0 {
+                registry = typeMetadata()
+            }
+
+            return registry
         }
     }
 }

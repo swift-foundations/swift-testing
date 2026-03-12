@@ -58,4 +58,8 @@ extension Testing {
     /// Delegates to Test.Box (= Ownership.Shared) so macro-generated code
     /// and section-based discovery use the same concrete type.
     public typealias Box<T: Sendable> = Test.Box<T>
+
+    /// Unambiguous reference to Test.__TestContentRecordContainer for macro expansions.
+    /// The macro emits enums conforming to this protocol for type-metadata-based discovery.
+    public typealias __TestContentRecordContainer = Test.__TestContentRecordContainer
 }

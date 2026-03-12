@@ -73,7 +73,17 @@ public struct SuiteMacro: MemberMacro {
             isStatic: true
         )
 
-        return [accessor, record]
+        // 3. Generate legacy container enum for type-metadata discovery.
+        // SymbolLinkageMarkers is not yet available in production toolchains.
+        let containerName = context.makeUniqueName("__🟡$_suite")
+        let container: DeclSyntax = """
+            @available(*, deprecated, message: "This type is an implementation detail of the testing library. Do not use it directly.")
+            private enum \(containerName): Testing.__TestContentRecordContainer {
+                nonisolated static let __testContentRecord: Testing.__TestContentRecord = \(recordName)
+            }
+            """
+
+        return [accessor, record, container]
     }
 
     // MARK: - Helpers

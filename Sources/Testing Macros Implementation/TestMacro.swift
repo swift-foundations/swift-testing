@@ -161,7 +161,20 @@ public struct TestMacro: PeerMacro {
             isStatic: typeInfo != nil
         )
 
-        return [accessor, record]
+        // 3. Generate legacy container enum for type-metadata discovery.
+        // SymbolLinkageMarkers (@_section/@_used) is not yet available in
+        // production toolchains, so section-based discovery is inert.
+        // This enum's conformance to __TestContentRecordContainer is found
+        // via __swift5_types metadata scanning in Discovery.typeMetadata().
+        let containerName = context.makeUniqueName("__🟡$_test_\(normalizedName)")
+        let container: DeclSyntax = """
+            @available(*, deprecated, message: "This type is an implementation detail of the testing library. Do not use it directly.")
+            private enum \(containerName): Testing.__TestContentRecordContainer {
+                nonisolated static let __testContentRecord: Testing.__TestContentRecord = \(recordName)
+            }
+            """
+
+        return [accessor, record, container]
     }
 
     /// Extracts argument collection expressions from macro arguments.
