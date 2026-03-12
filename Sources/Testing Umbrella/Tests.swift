@@ -32,7 +32,7 @@
 ///
 /// extension MyType.Test.Snapshot {
 ///     @Test func renders_correctly() {
-///         #snapshot(MyType().render(), as: .lines)
+///         snapshot(MyType().render(), as: .lines)
 ///     }
 /// }
 /// ```

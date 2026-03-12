@@ -85,7 +85,7 @@ extension Showcase.Document.Test.Snapshot {
     func example_document_rendering() {
         let doc = Showcase.Document.example
 
-        #snapshot(doc.render(), as: .lines)
+        snapshot(doc.render(), as: .lines)
     }
 
     // Full text comparison (not line-by-line)
@@ -93,7 +93,7 @@ extension Showcase.Document.Test.Snapshot {
     func example_document_text() {
         let doc = Showcase.Document.example
 
-        #snapshot(doc.render(), as: .text)
+        snapshot(doc.render(), as: .text)
     }
 
     // Named snapshots to track a document through mutations
@@ -101,13 +101,13 @@ extension Showcase.Document.Test.Snapshot {
     func document_evolution() {
         var doc = Showcase.Document(title: "Draft")
 
-        #snapshot(doc.render(), as: .lines, named: "empty")
+        snapshot(doc.render(), as: .lines, named: "empty")
 
         doc.sections.append(.init(heading: "Introduction", body: "Hello, world."))
-        #snapshot(doc.render(), as: .lines, named: "with_intro")
+        snapshot(doc.render(), as: .lines, named: "with_intro")
 
         doc.sections.append(.init(heading: "Conclusion", body: "Goodbye."))
-        #snapshot(doc.render(), as: .lines, named: "with_conclusion")
+        snapshot(doc.render(), as: .lines, named: "with_conclusion")
     }
 
     // Inline snapshot: expected value embedded in source
@@ -136,6 +136,6 @@ extension Showcase.Document.Test.Snapshot {
         let strategy = Test.Snapshot.Strategy<String, String>.lines
             .pullback { (doc: Showcase.Document) in doc.render() }
 
-        #snapshot(Showcase.Document.example, as: strategy)
+        snapshot(Showcase.Document.example, as: strategy)
     }
 }

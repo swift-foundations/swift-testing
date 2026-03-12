@@ -21,6 +21,9 @@
 // Includes: Test.Runner, Test.Plan, Test.Exclusion.Controller
 @_exported public import Tests
 
+// Re-export inline snapshot module for snapshot() free function
+@_exported public import Tests_Inline_Snapshot
+
 // Platform abstraction for discovery and I/O
 // Note: NOT @_exported — Kernel is an implementation detail of Testing Core.
 // Re-exporting Kernel would leak String_Primitives.String (via the
