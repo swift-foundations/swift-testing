@@ -1,7 +1,7 @@
 import Testing
 import Testing_Test_Support
 
-extension Testing.Configuration.OutputFormat {
+extension Testing.Configuration.Output.Format {
     @Suite
     struct Test {
         @Suite struct Unit {}
@@ -10,11 +10,11 @@ extension Testing.Configuration.OutputFormat {
 
 // MARK: - Unit
 
-extension Testing.Configuration.OutputFormat.Test.Unit {
+extension Testing.Configuration.Output.Format.Test.Unit {
     @Testing.Test
     func consoleAndJsonCasesAreDistinct() {
-        let console = Testing.Configuration.OutputFormat.console
-        let json = Testing.Configuration.OutputFormat.json
+        let console = Testing.Configuration.Output.Format.console
+        let json = Testing.Configuration.Output.Format.json
 
         var config = Testing.Configuration()
         config.output.format = console

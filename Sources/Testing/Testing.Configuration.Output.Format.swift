@@ -9,9 +9,9 @@
 //
 // ===----------------------------------------------------------------------===//
 
-extension Testing.Configuration {
+extension Testing.Configuration.Output {
     /// Output format for test results.
-    public enum OutputFormat: Sendable {
+    public enum Format: Sendable {
         /// Human-readable console output.
         case console
         /// JSON output (no Foundation).

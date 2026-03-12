@@ -111,11 +111,11 @@ final class ConfigurationTests: XCTestCase {
     }
 }
 
-// MARK: - Configuration.OutputFormat Tests
+// MARK: - Configuration.Output.Format Tests
 
 final class ConfigurationOutputFormatTests: XCTestCase {
     func testConsoleAndJsonCasesAreDistinct() {
-        Testing.Configuration.OutputFormat.Test.Unit().consoleAndJsonCasesAreDistinct()
+        Testing.Configuration.Output.Format.Test.Unit().consoleAndJsonCasesAreDistinct()
     }
 }
 

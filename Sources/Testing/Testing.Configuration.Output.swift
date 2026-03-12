@@ -13,13 +13,13 @@ extension Testing.Configuration {
     /// Output configuration for test results.
     public struct Output: Sendable {
         /// The output format.
-        public var format: OutputFormat
+        public var format: Format
 
         /// File path for output (nil = stdout).
         public var path: Swift.String?
 
         /// Creates a default output configuration.
-        public init(format: OutputFormat = .console, path: Swift.String? = nil) {
+        public init(format: Format = .console, path: Swift.String? = nil) {
             self.format = format
             self.path = path
         }
