@@ -12,9 +12,11 @@
 extension Testing.Configuration.Output {
     /// Output format for test results.
     public enum Format: Sendable {
-        /// Human-readable console output.
+        /// Console + structured JSONL (default).
+        case tee
+        /// Human-readable console output only.
         case console
-        /// JSON output (no Foundation).
+        /// Legacy JSON output.
         case json
     }
 }

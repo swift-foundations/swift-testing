@@ -11,6 +11,7 @@
 
 import Dependencies
 import Tests_Inline_Snapshot
+import Tests_Reporter
 import Witnesses
 import Kernel
 
@@ -84,6 +85,8 @@ extension Testing {
         // Create reporter based on output format
         let reporter: Test.Reporter
         switch config.output.format {
+        case .tee:
+            reporter = .tee(.console, .structured(to: config.output.structuredPath))
         case .console:
             reporter = .console
         case .json:

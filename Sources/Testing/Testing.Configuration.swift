@@ -66,13 +66,19 @@ extension Testing {
             }
 
             if let outputValue = Environment.read("SWIFT_TEST_OUTPUT") {
-                if outputValue.lowercased() == "json" {
+                switch outputValue.lowercased() {
+                case "console":
+                    config.output.format = .console
+                case "json":
                     config.output.format = .json
+                default:
+                    break // keep default (.tee)
                 }
             }
 
             if let path = Environment.read("SWIFT_TEST_OUTPUT_PATH") {
                 config.output.path = path
+                config.output.structuredPath = path
             }
 
             return config

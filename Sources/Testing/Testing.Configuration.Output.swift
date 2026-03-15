@@ -18,10 +18,21 @@ extension Testing.Configuration {
         /// File path for output (nil = stdout).
         public var path: Swift.String?
 
+        /// The file path for structured JSONL output.
+        ///
+        /// Used when format is `.tee`. Defaults to `.build/test-results.jsonl`.
+        /// Override via `SWIFT_TEST_OUTPUT_PATH`.
+        public var structuredPath: Swift.String
+
         /// Creates a default output configuration.
-        public init(format: Format = .console, path: Swift.String? = nil) {
+        public init(
+            format: Format = .tee,
+            path: Swift.String? = nil,
+            structuredPath: Swift.String = ".build/test-results.jsonl"
+        ) {
             self.format = format
             self.path = path
+            self.structuredPath = structuredPath
         }
     }
 }
