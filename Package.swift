@@ -48,9 +48,9 @@ let package = Package(
         .package(url: "https://github.com/swiftlang/swift-syntax", "602.0.0"..<"603.0.0")
     ],
     targets: [
-        // UMBRELLA TARGET - what users import as "Testing"
-        // Contains: macro declarations + @_exported re-exports
-        // This ensures @Test macro and Test.* types coexist
+
+        // MARK: - Umbrella
+
         .target(
             name: "Testing",
             dependencies: [
@@ -63,8 +63,9 @@ let package = Package(
             ],
             path: "Sources/Testing Umbrella"
         ),
-        // Core implementation - discovery, configuration, reporters
-        // Users don't import this directly
+
+        // MARK: - Core
+
         .target(
             name: "Testing Core",
             dependencies: [
@@ -82,7 +83,9 @@ let package = Package(
             ],
             path: "Sources/Testing"
         ),
-        // Macro implementation target (swift-syntax based)
+
+        // MARK: - Macros
+
         .macro(
             name: "Testing Macros Implementation",
             dependencies: [
@@ -91,8 +94,9 @@ let package = Package(
             ],
             path: "Sources/Testing Macros Implementation"
         ),
-        // Tests for macro expansion
-        // Effects integration for testing effect handlers
+
+        // MARK: - Effects
+
         .target(
             name: "Testing Effects",
             dependencies: [
@@ -102,6 +106,9 @@ let package = Package(
             ],
             path: "Sources/Testing Effects"
         ),
+
+        // MARK: - Test Support
+
         .target(
             name: "Testing Test Support",
             dependencies: [
@@ -113,6 +120,9 @@ let package = Package(
             ],
             path: "Tests/Support"
         ),
+
+        // MARK: - Tests
+
         .testTarget(
             name: "Testing Tests",
             dependencies: [
