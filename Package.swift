@@ -51,6 +51,9 @@ let package = Package(
 
         // MARK: - Umbrella
 
+        // NOTE: [MOD-EXCEPT] Testing umbrella contains macro declarations that must
+        // coexist with @_exported import of the macro implementation module.
+        // This is an accepted deviation from MOD-005 (re-export-only umbrella).
         .target(
             name: "Testing",
             dependencies: [
