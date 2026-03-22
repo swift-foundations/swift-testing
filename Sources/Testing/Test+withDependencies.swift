@@ -63,17 +63,16 @@ extension Test {
     /// ```
     ///
     /// - Parameters:
-    ///   - isolation: The actor isolation context for the operation.
     ///   - modify: A closure that modifies the dependency values for the scope.
     ///   - operation: The async operation to execute with the modified values.
     /// - Returns: The result of the operation.
     /// - Throws: The typed error from the operation.
     @inlinable
+    nonisolated(nonsending)
     public static func withDependencies<T, E: Swift.Error>(
-        isolation: isolated (any Actor)? = #isolation,
         _ modify: @escaping (inout Dependency.Values) -> Void,
-        operation: () async throws(E) -> T
+        operation: nonisolated(nonsending) () async throws(E) -> T
     ) async throws(E) -> T {
-        try await Dependencies.withDependencies(isolation: isolation, mode: .test, modify, operation: operation)
+        try await Dependencies.withDependencies(mode: .test, modify, operation: operation)
     }
 }
