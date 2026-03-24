@@ -38,8 +38,11 @@ public import XCTest
 public final class __TestingRunner: XCTestCase {
     /// Discovers and runs all @Test-annotated functions via section-based discovery.
     public func testAll() async {
-        let hasFailures = await Testing.run()
-        XCTAssertFalse(hasFailures, "swift-testing reported test failures")
+        do {
+            try await Testing.run()
+        } catch {
+            XCTFail("swift-testing reported test failures: \(error)")
+        }
     }
 }
 #endif

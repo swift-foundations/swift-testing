@@ -24,8 +24,12 @@ extension Testing {
     ///
     /// - Returns: Never returns; exits the process.
     public static func __swiftPMEntryPoint() async -> Never {
-        let hasFailures = await run(registry: Discovery.all())
-        ISO_9945.Kernel.Process.Exit.now(hasFailures ? 1 : 0)
+        do {
+            try await run(registry: Discovery.all())
+            ISO_9945.Kernel.Process.Exit.now(0)
+        } catch {
+            ISO_9945.Kernel.Process.Exit.now(1)
+        }
     }
 
     /// Main entry point for test execution.
@@ -57,23 +61,24 @@ extension Testing {
     /// - `SWIFT_TEST_PARALLEL`: "0" = serial, N = limited(N)
     /// - `SWIFT_TEST_OUTPUT`: "json" for JSON output
     /// - `SWIFT_TEST_OUTPUT_PATH`: File path for output
-    public static func main() async {
-        await run(registry: Discovery.all())
+    public static func main() async throws(Run.Error) {
+        try await run(registry: Discovery.all())
     }
 
-    /// Runs all discovered tests and returns whether any failed.
+    /// Runs all discovered tests.
     ///
     /// Use this for programmatic test execution (e.g., XCTest bridges).
     /// Discovers tests from section records and executes them with console output.
     ///
-    /// - Returns: `true` if any test failed, `false` if all passed.
-    public static func run() async -> Bool {
-        await run(registry: Discovery.all())
+    /// - Throws: ``Testing/Run/Error/failed(_:)`` if any test failed.
+    public static func run() async throws(Run.Error) {
+        try await run(registry: Discovery.all())
     }
 
-    /// Internal runner that executes a test plan and returns whether there were failures.
-    @discardableResult
-    private static func run(registry: consuming Test.Plan.Registry) async -> Bool {
+    /// Internal runner that executes a test plan.
+    ///
+    /// - Throws: ``Testing/Run/Error/failed(_:)`` if any test failed.
+    private static func run(registry: consuming Test.Plan.Registry) async throws(Run.Error) {
         let config = Configuration.current
 
         // Apply filters
@@ -97,6 +102,11 @@ extension Testing {
         var runner = Test.Runner(reporter: reporter)
         runner.scopeProviders.append(.snapshot)
 
+        // Drain global fixture teardowns (e.g., static thread pool shutdown)
+        runner.postRunActions.append {
+            await Test.Teardown.drain()
+        }
+
         // Append inline snapshot write-back action
         runner.postRunActions.append {
             let state = Test.Snapshot.Inline.state
@@ -116,6 +126,8 @@ extension Testing {
             await runner.run(plan, concurrency: config.concurrency)
         }
 
-        return result.hasFailures
+        if result.hasFailures {
+            throw .failed(result)
+        }
     }
 }
