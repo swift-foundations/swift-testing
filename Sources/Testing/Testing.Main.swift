@@ -26,9 +26,9 @@ extension Testing {
     public static func __swiftPMEntryPoint() async -> Never {
         do {
             try await run(registry: Discovery.all())
-            ISO_9945.Kernel.Process.Exit.now(0)
+            Kernel.Process.Exit.now(0)
         } catch {
-            ISO_9945.Kernel.Process.Exit.now(1)
+            Kernel.Process.Exit.now(1)
         }
     }
 
