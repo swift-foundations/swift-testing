@@ -100,7 +100,7 @@ public final class __TestingRunner: XCTestCase {
 
 **Current issue**: Section discovery finds 0 tests. Two potential causes:
 1. `hasFeature(SymbolLinkageMarkers)` evaluates to `false` → records not placed in section
-2. `@_section` / `@_used` (underscored) vs `@section` / `@used` (stable) — wrong attribute names
+2. `@section` / `@used` (underscored) vs `@section` / `@used` (stable) — wrong attribute names
 3. Our `Loader.Section.all(.swiftTestContent)` doesn't find the records
 
 **Advantages**:
@@ -183,8 +183,8 @@ The macro expansion (from `TestMacro.swift`) emits:
 
 ```swift
 #if hasFeature(SymbolLinkageMarkers)
-@_section("__DATA_CONST,__swift5_tests")
-@_used
+@section("__DATA_CONST,__swift5_tests")
+@used
 #endif
 ```
 
@@ -204,11 +204,11 @@ See `Experiments/section-discovery-verification/` for full details.
 - `@section` → `error: struct 'section' cannot be used as an attribute`
 - `@used` → `error: unknown attribute 'used'`
 
-**H2b: `@_section`/`@_used` (underscored, experimental) — RECOGNIZED but NON-FUNCTIONAL in Swift 6.2.**
+**H2b: `@section`/`@used` (underscored, experimental) — RECOGNIZED but NON-FUNCTIONAL in Swift 6.2.**
 - When `SymbolLinkageMarkers` is enabled, both attributes are recognized
-- But **every** variable declaration fails: `error: global variable must be a compile-time constant to use @_section attribute`
+- But **every** variable declaration fails: `error: global variable must be a compile-time constant to use @section attribute`
 - Tested with: `UInt64` literals, tuples, struct initializers, `_const` modifier, `CompileTimeConst` feature
-- The compile-time constant evaluator required for `@_section` does not exist in Swift 6.2
+- The compile-time constant evaluator required for `@section` does not exist in Swift 6.2
 
 ### Root Cause
 
@@ -235,7 +235,7 @@ When Swift 6.3 is available:
 
 1. Update the `@Test` macro to use `@section`/`@used` (non-underscored, stable) gated by `#if compiler(>=6.3)`
 2. Adopt Apple's `#if objectFormat()` pattern for cross-platform section names (MachO, ELF, COFF, Wasm)
-3. Remove the dead `#if hasFeature(SymbolLinkageMarkers)` / `@_section` / `@_used` code — it was never functional
+3. Remove the dead `#if hasFeature(SymbolLinkageMarkers)` / `@section` / `@used` code — it was never functional
 4. The `#if compiler(<6.3)` container enums automatically stop being emitted — no code changes needed
 
 ### Legacy Discovery (Swift 6.2)

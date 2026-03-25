@@ -162,7 +162,7 @@ public struct TestMacro: PeerMacro {
         )
 
         // 3. Generate legacy container enum for type-metadata discovery.
-        // SymbolLinkageMarkers (@_section/@_used) is not yet available in
+        // SymbolLinkageMarkers (@section/@used) is not yet available in
         // production toolchains, so section-based discovery is inert.
         // This enum's conformance to __TestContentRecordContainer is found
         // via __swift5_types metadata scanning in Discovery.typeMetadata().

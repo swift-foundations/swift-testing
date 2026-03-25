@@ -51,13 +51,13 @@ func sectionRecord(
     return """
         #if hasFeature(SymbolLinkageMarkers)
         #if os(macOS) || os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
-        @_section("__DATA_CONST,__swift5_tests")
+        @section("__DATA_CONST,__swift5_tests")
         #elseif os(Linux) || os(FreeBSD) || os(OpenBSD) || os(Android)
-        @_section("swift5_tests")
+        @section("swift5_tests")
         #elseif os(Windows)
-        @_section(".sw5test$B")
+        @section(".sw5test$B")
         #endif
-        @_used
+        @used
         #endif
         @available(*, deprecated, message: "This is an implementation detail of the testing library. Do not use it directly.")
         private \(raw: staticKeyword)nonisolated let \(recordName): Testing.__TestContentRecord = (
