@@ -9,11 +9,11 @@ let package = Package(
             name: "section-discovery-verification",
             swiftSettings: [
                 .enableUpcomingFeature("InternalImportsByDefault"),
-                // NOTE: .enableExperimentalFeature("SymbolLinkageMarkers") was tested.
-                // It makes hasFeature(SymbolLinkageMarkers) true, and @_section/@_used
-                // are recognized, but ALL variable declarations fail with:
+                // NOTE: SymbolLinkageMarkers was removed in Swift 6.3.
+                // Replaced by @section/@used (SE-0492) which are now stable language features.
+                // @_section/@_used (underscored) failed in 6.2 with:
                 // "global variable must be a compile-time constant to use @_section attribute"
-                // The compile-time constant evaluator does not exist in Swift 6.2.
+                // In 6.3, @section/@used + #objectFormat are the official API.
             ]
         )
     ]
