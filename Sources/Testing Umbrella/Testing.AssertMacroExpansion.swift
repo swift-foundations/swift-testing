@@ -10,7 +10,7 @@
 // ===----------------------------------------------------------------------===//
 
 public import SwiftSyntax
-public import SwiftSyntaxMacroExpansion
+import SwiftSyntaxMacroExpansion
 public import SwiftSyntaxMacros
 public import SwiftSyntaxMacrosGenericTestSupport
 public import Test_Primitives
