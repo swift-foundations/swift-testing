@@ -60,8 +60,8 @@ public struct SuiteMacro: MemberMacro {
                     modifiers: \(raw: traits)
                 )
                 let boxed = Testing.Box(registration)
-                let ptr = Unmanaged.passRetained(boxed).toOpaque()
-                outValue.storeBytes(of: ptr, as: UnsafeRawPointer?.self)
+                let ptr = unsafe Unmanaged.passRetained(boxed).toOpaque()
+                unsafe outValue.storeBytes(of: ptr, as: UnsafeRawPointer?.self)
                 return true
             }
             """
@@ -79,7 +79,7 @@ public struct SuiteMacro: MemberMacro {
         let container: DeclSyntax = """
             @available(*, deprecated, message: "This type is an implementation detail of the testing library. Do not use it directly.")
             private enum \(containerName): Testing.__TestContentRecordContainer {
-                nonisolated static let __testContentRecord: Testing.__TestContentRecord = \(recordName)
+                nonisolated static let __testContentRecord: Testing.__TestContentRecord = unsafe \(recordName)
             }
             """
 
