@@ -150,7 +150,7 @@ let package = Package(
     swiftLanguageModes: [.v6]
 )
 
-for target in package.targets where ![.system, .binary, .plugin, .macro, .test].contains(target.type) {
+for target in package.targets where ![.system, .binary, .plugin, .macro].contains(target.type) {
     let ecosystem: [SwiftSetting] = [
         .strictMemorySafety(),
         .enableUpcomingFeature("ExistentialAny"),
@@ -159,7 +159,6 @@ for target in package.targets where ![.system, .binary, .plugin, .macro, .test].
         .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
         .enableExperimentalFeature("Lifetimes"),
         .enableExperimentalFeature("SuppressedAssociatedTypes"),
-        .enableExperimentalFeature("SuppressedAssociatedTypesWithDefaults"),
     ]
 
     let package: [SwiftSetting] = []
