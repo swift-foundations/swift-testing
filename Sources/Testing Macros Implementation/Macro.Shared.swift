@@ -12,6 +12,63 @@
 import SwiftSyntax
 import SwiftSyntaxMacros
 
+// MARK: - Lexical Context
+
+/// Builds the fully-qualified suite name from all levels of lexical context.
+///
+/// Macros only see the local syntax node. For extension-nested declarations, the
+/// enclosing scopes must be walked to reconstruct the full dotted path. Without this,
+/// `extension IO { @Suite struct Benchmark {} }` registers as `"Benchmark"` instead
+/// of `"IO.Benchmark"`, breaking the parent–child hierarchy in the test tree.
+///
+/// - Parameters:
+///   - context: The macro expansion context providing lexical scopes.
+///   - declarationName: Optional name to append (the declared type name for `@Suite`).
+///     Pass `nil` for `@Test` where the declaration is a function.
+/// - Returns: The dot-separated fully-qualified name, or empty string if no scope found.
+func buildQualifiedSuiteName(
+    from context: some MacroExpansionContext,
+    declarationName: String? = nil
+) -> String {
+    var components: [String] = []
+
+    for syntax in context.lexicalContext {
+        if let name = syntax.asDeclGroupName {
+            components.append(name)
+        }
+    }
+
+    // lexicalContext is innermost-first; reverse for outermost-first
+    components.reverse()
+
+    if let name = declarationName {
+        components.append(name)
+    }
+
+    return components.joined(separator: ".")
+}
+
+extension Syntax {
+    /// Extracts the type name from a declaration group syntax node.
+    ///
+    /// For extensions, returns the extended type's trimmed description (e.g., `"IO.Benchmark"`).
+    /// For struct/class/enum/actor, returns the simple name (e.g., `"Throughput"`).
+    var asDeclGroupName: String? {
+        if let decl = self.as(StructDeclSyntax.self) {
+            return decl.name.text
+        } else if let decl = self.as(ClassDeclSyntax.self) {
+            return decl.name.text
+        } else if let decl = self.as(EnumDeclSyntax.self) {
+            return decl.name.text
+        } else if let decl = self.as(ActorDeclSyntax.self) {
+            return decl.name.text
+        } else if let decl = self.as(ExtensionDeclSyntax.self) {
+            return decl.extendedType.trimmedDescription
+        }
+        return nil
+    }
+}
+
 // MARK: - Shared Macro Utilities
 
 /// Extracts trait expressions from macro attribute arguments.

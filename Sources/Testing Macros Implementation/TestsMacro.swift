@@ -86,22 +86,12 @@ public struct TestsMacro: DeclarationMacro {
     /// For `extension MyModule.MyType { #Tests }`, returns "MyModule.MyType".
     /// Falls back to a unique identifier if context cannot be determined.
     private static func buildGroupIdentifier(from context: some MacroExpansionContext) -> String {
-        var components: [String] = []
-
-        for lexicalContext in context.lexicalContext {
-            if let name = lexicalContext.asProtocol((any DeclGroupSyntax).self)?.declGroupName {
-                components.append(name)
-            }
-        }
-
-        if components.isEmpty {
-            // Fallback: use a unique name to avoid collisions
+        let name = buildQualifiedSuiteName(from: context)
+        if name.isEmpty {
             let unique = context.makeUniqueName("Tests")
             return unique.text
         }
-
-        // Reverse because lexicalContext is innermost-first
-        return components.reversed().joined(separator: ".")
+        return name
     }
 
     /// Extracts snapshot configuration from macro arguments.
@@ -125,22 +115,3 @@ public struct TestsMacro: DeclarationMacro {
     }
 }
 
-extension DeclGroupSyntax {
-    /// Extracts the name from a declaration group (struct, class, enum, extension, etc.)
-    fileprivate var declGroupName: String? {
-        switch self {
-        case let decl as StructDeclSyntax:
-            return decl.name.text
-        case let decl as ClassDeclSyntax:
-            return decl.name.text
-        case let decl as EnumDeclSyntax:
-            return decl.name.text
-        case let decl as ActorDeclSyntax:
-            return decl.name.text
-        case let decl as ExtensionDeclSyntax:
-            return decl.extendedType.trimmedDescription
-        default:
-            return nil
-        }
-    }
-}

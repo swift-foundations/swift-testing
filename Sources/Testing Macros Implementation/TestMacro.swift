@@ -55,26 +55,33 @@ public struct TestMacro: PeerMacro {
         let isThrows = funcDecl.signature.effectSpecifiers?.throwsClause != nil
         let tryKeyword = isThrows ? "try " : ""
 
-        // Determine if inside a type declaration (Suite) or extension
-        // Extract both the ref (for code generation) and the name (for display).
-        // Use trimmedDescription (not TokenSyntax) to preserve backtick escaping.
-        let typeInfo: (ref: String, name: String)? = context.lexicalContext.first.flatMap { syntax in
+        // Determine the enclosing type for code generation and tree placement.
+        //
+        // typeRef: innermost type name for instantiation (e.g., "Throughput")
+        // suiteName: fully-qualified name from all lexical contexts for tree placement
+        //            (e.g., "IO.Benchmark.Throughput")
+        //
+        // These differ when a @Test is inside a struct declared in an extension:
+        //   extension IO.Benchmark { struct Throughput { @Test func foo() {} } }
+        //   typeRef = "Throughput", suiteName = "IO.Benchmark.Throughput"
+        let typeRef: String? = context.lexicalContext.first.flatMap { syntax in
             if let structDecl = syntax.as(StructDeclSyntax.self) {
-                return (structDecl.name.trimmedDescription, structDecl.name.text)
+                return structDecl.name.trimmedDescription
             } else if let classDecl = syntax.as(ClassDeclSyntax.self) {
-                return (classDecl.name.trimmedDescription, classDecl.name.text)
+                return classDecl.name.trimmedDescription
             } else if let enumDecl = syntax.as(EnumDeclSyntax.self) {
-                return (enumDecl.name.trimmedDescription, enumDecl.name.text)
+                return enumDecl.name.trimmedDescription
             } else if let extDecl = syntax.as(ExtensionDeclSyntax.self) {
-                let text = extDecl.extendedType.trimmedDescription
-                return (text, text)
+                return extDecl.extendedType.trimmedDescription
             }
             return nil
         }
-        let suiteExpr = typeInfo.map { "\"\($0.name)\"" } ?? "nil"
+
+        let suiteName = buildQualifiedSuiteName(from: context)
+        let suiteExpr = suiteName.isEmpty ? "nil" : "\"\(suiteName)\""
 
         // When inside a type, declarations need to be static
-        let staticKeyword = typeInfo != nil ? "static " : ""
+        let staticKeyword = typeRef != nil ? "static " : ""
 
         // Build the body expression using raw interpolation for both type and function names.
         // TokenSyntax interpolation into ExprSyntax silently drops backtick-escaped
@@ -91,8 +98,7 @@ public struct TestMacro: PeerMacro {
             let loopClose = String(repeating: " }", count: argCollections.count)
             let awaitKeyword = isAsync ? "await " : ""
 
-            if let typeInfo {
-                let typeRef = typeInfo.ref
+            if let typeRef {
                 let body = "let instance = \(typeRef)(); \(loopOpen)\(tryKeyword)\(awaitKeyword)instance.\(funcRef)(\(callArgs))\(loopClose)"
                 if isAsync {
                     bodyExpr = "Testing.__TestBody.async { \(raw: body) }"
@@ -107,8 +113,7 @@ public struct TestMacro: PeerMacro {
                     bodyExpr = "Testing.__TestBody.sync { \(raw: body) }"
                 }
             }
-        } else if let typeInfo {
-            let typeRef = typeInfo.ref
+        } else if let typeRef {
             if isAsync {
                 bodyExpr = "Testing.__TestBody.async { let instance = \(raw: typeRef)(); \(raw: tryKeyword)await instance.\(raw: funcRef)() }"
             } else {
@@ -158,7 +163,7 @@ public struct TestMacro: PeerMacro {
             kind: "test",
             accessorName: accessorName,
             recordName: recordName,
-            isStatic: typeInfo != nil
+            isStatic: typeRef != nil
         )
 
         // 3. Generate legacy container enum for type-metadata discovery.

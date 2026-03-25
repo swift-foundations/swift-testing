@@ -33,7 +33,8 @@ public struct SuiteMacro: MemberMacro {
         conformingTo protocols: [TypeSyntax],
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
-        let typeName = typeName(from: declaration)
+        let simpleName = typeName(from: declaration)
+        let suiteName = buildQualifiedSuiteName(from: context, declarationName: simpleName)
 
         let accessorName = context.makeUniqueName("suite_accessor")
         let recordName = context.makeUniqueName("suite_record")
@@ -48,7 +49,7 @@ public struct SuiteMacro: MemberMacro {
                 let registration = Testing.SuiteRegistration(
                     id: Testing.__TestID(
                         module: moduleName,
-                        suite: "\(raw: typeName)",
+                        suite: "\(raw: suiteName)",
                         name: "",
                         sourceLocation: Testing.__TestSourceLocation(
                             fileID: fileID,
