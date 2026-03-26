@@ -218,9 +218,15 @@ This is not a bug in our implementation — it's a toolchain limitation. Apple's
 
 ## Outcome
 
-**Status**: IMPLEMENTED
+**Status**: IMPLEMENTED (revised 2026-03-26)
 
-**Decision**: Two-tier discovery: section-based (Swift 6.3+) as the principled long-term mechanism, with legacy type-metadata discovery (Swift 6.2) as a zero-cost bridge.
+**Decision**: Two-tier discovery: section-based (Swift 6.3+) as the principled long-term mechanism, with legacy type-metadata discovery (Swift 6.2) as a zero-cost bridge. SPM integration via `__swiftPMEntryPoint` as the sole entry point.
+
+### XCTest Bridge Removed (2026-03-26)
+
+The `__TestingRunner` XCTest bridge (`Testing.XCTestBridge.swift`) has been deleted. Root cause: SPM runs XCTest and Swift Testing as separate sequential passes using separate processes (`xctest` tool and `swiftpm-testing-helper` respectively). Both passes discovered entry points into the custom runner, causing double execution. The `xctest` process completed first; the `swiftpm-testing-helper` process hung.
+
+The `__swiftPMEntryPoint` path is now the sole integration mechanism, matching Apple's upstream model. SPM's generated runner already calls `Testing.__swiftPMEntryPoint()` via `#if canImport(Testing)` — zero consumer ceremony. See `HANDOFF-testing-double-run.md` in swift-io for the full investigation.
 
 ### The Correct Architecture (Swift 6.3+)
 
@@ -289,5 +295,5 @@ private enum __🟡$_myTest: Testing.__TestContentRecordContainer {
 - Record structure: `swiftlang/swift-testing/Documentation/ABI/TestContent.md`
 - Our macro: `swift-testing/Sources/Testing Macros Implementation/TestMacro.swift`
 - Our discovery: `swift-testing/Sources/Testing/Testing.Discovery.swift`
-- Our XCTest bridge: `swift-testing/Sources/Testing Umbrella/Testing.XCTestBridge.swift`
+- Our XCTest bridge: REMOVED (was `swift-testing/Sources/Testing Umbrella/Testing.XCTestBridge.swift`)
 - Existing research: `swift-institute/Research/comparative-swift-testing-frameworks.md`
