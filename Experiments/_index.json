@@ -1,0 +1,46 @@
+{
+  "$schema": "https://swift-institute.org/schemas/experiments-index-v1.json",
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-04-18",
+  "title": "Experiments Index",
+  "blurb": "",
+  "scope": "swift-testing (swift-foundations)",
+  "experiments": [
+    {
+      "directory": "typed-throws-autoclosure-inference",
+      "displayName": "typed-throws-autoclosure-inference",
+      "purpose": "Typed throws E inference in autoclosures",
+      "date": "2025-12-15",
+      "toolchain": "Swift 6.1",
+      "status": "CONFIRMED",
+      "statusDetail": null,
+      "statusRaw": "CONFIRMED",
+      "supersededBy": null,
+      "crossRefs": []
+    },
+    {
+      "directory": "syntax-showcase",
+      "displayName": "syntax-showcase",
+      "purpose": "Demonstrate @Test, snapshot, and performance trait syntax",
+      "date": "2026-03-01",
+      "toolchain": "Swift 6.2.4",
+      "status": "CONFIRMED",
+      "statusDetail": null,
+      "statusRaw": "CONFIRMED",
+      "supersededBy": null,
+      "crossRefs": []
+    },
+    {
+      "directory": "section-discovery-verification",
+      "displayName": "section-discovery-verification",
+      "purpose": "Verify why section-based test discovery finds 0 tests",
+      "date": "2026-03-01",
+      "toolchain": "Swift 6.2.4",
+      "status": "CONFIRMED",
+      "statusDetail": null,
+      "statusRaw": "CONFIRMED",
+      "supersededBy": null,
+      "crossRefs": []
+    }
+  ]
+}
