@@ -128,10 +128,10 @@ extension Testing {
             }
 
             if kind == Test.__TestContentKind.suite.rawValue {
-                let reg = unsafe Ownership.Transfer.Retained<Test.Box<Test.Suite.Registration>>(ptr).take().value
+                let reg = unsafe Ownership.Transfer.Retained<Test.Box<Test.Suite.Registration>>.Outgoing(ptr).consume().value
                 registry.add(suite: reg)
             } else {
-                let reg = unsafe Ownership.Transfer.Retained<Test.Box<Test.Registration>>(ptr).take().value
+                let reg = unsafe Ownership.Transfer.Retained<Test.Box<Test.Registration>>.Outgoing(ptr).consume().value
                 registry.add(id: reg.id, modifiers: reg.modifiers, body: reg.body)
             }
         }
