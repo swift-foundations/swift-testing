@@ -81,6 +81,7 @@ print("     Every variable rejected: 'must be a compile-time constant'")
 // ============================================================================
 // MARK: - H3: Section Scanning (for reference — scans existing images)
 // Result: No records from our code (expected, given H2 results).
+// Revalidated: Swift 6.3.1 (2026-04-30) — PASSES
 //         May find Apple runtime records in system images.
 // ============================================================================
 

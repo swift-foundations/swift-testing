@@ -85,6 +85,7 @@ func bridge<Value, Format>(
 // Hypothesis: When the value expression throws, the caller uses `try` and
 //             the typed error propagates. The function takes the result Value.
 // Result: CONFIRMED — Build Succeeded
+// Revalidated: Swift 6.3.1 (2026-04-30) — PASSES
 
 enum TestError: Error { case boom }
 func mayThrow() throws(TestError) -> Int { 42 }
