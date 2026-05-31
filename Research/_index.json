@@ -38,17 +38,6 @@
       "statusRaw": "DECISION",
       "tier": null,
       "scope": null
-    },
-    {
-      "file": "audit.md",
-      "displayName": "audit",
-      "topic": "Consolidated audit (tests + testing + test-primitives)",
-      "date": "2026-04-08",
-      "status": "ACTIVE",
-      "statusDetail": null,
-      "statusRaw": "ACTIVE",
-      "tier": null,
-      "scope": null
     }
   ]
 }
