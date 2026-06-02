@@ -27,23 +27,23 @@ let package = Package(
     ],
     dependencies: [
         // Tier 1: Primitives
-        .package(path: "../../swift-primitives/swift-standard-library-extensions"),
-        .package(path: "../../swift-primitives/swift-time-primitives"),
-        .package(path: "../../swift-primitives/swift-test-primitives"),
+        .package(url: "https://github.com/swift-primitives/swift-standard-library-extensions.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-time-primitives.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-test-primitives.git", branch: "main"),
         // Tier 2: Runner infrastructure
-        .package(path: "../swift-tests"),
+        .package(url: "https://github.com/swift-foundations/swift-tests.git", branch: "main"),
         // Platform abstraction (file I/O, environment variables)
-        .package(path: "../swift-kernel"),
+        .package(url: "https://github.com/swift-foundations/swift-kernel.git", branch: "main"),
         // Environment variable reading
-        .package(path: "../swift-environment"),
+        .package(url: "https://github.com/swift-foundations/swift-environment.git", branch: "main"),
         // Dynamic loader (symbol lookup)
-        .package(path: "../swift-loader"),
+        .package(url: "https://github.com/swift-foundations/swift-loader.git", branch: "main"),
         // Dependency injection
-        .package(path: "../swift-dependencies", traits: ["Clocks"]),
+        .package(url: "https://github.com/swift-foundations/swift-dependencies.git", branch: "main", traits: ["Clocks"]),
         // Effects system (for optional Testing Effects target)
-        .package(path: "../swift-effects"),
+        .package(url: "https://github.com/swift-foundations/swift-effects.git", branch: "main"),
         // Witness system (mode context for test/live execution)
-        .package(path: "../swift-witnesses"),
+        .package(url: "https://github.com/swift-foundations/swift-witnesses.git", branch: "main"),
         // Macro implementation
         .package(url: "https://github.com/swiftlang/swift-syntax", "602.0.0"..<"603.0.0")
     ],
