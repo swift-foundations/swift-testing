@@ -145,7 +145,7 @@ swift-testing is pre-1.0 and under active development. Public macro names and th
 ## Community
 
 <!-- BEGIN: discussion -->
-*Discussion thread will be created at first public flip.*
+*Discussion thread will be created at the first public release.*
 <!-- END: discussion -->
 
 ---
