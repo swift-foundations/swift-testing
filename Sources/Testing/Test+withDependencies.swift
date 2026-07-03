@@ -69,10 +69,11 @@ extension Test {
     /// - Throws: The typed error from the operation.
     @inlinable
     nonisolated(nonsending)
-    public static func withDependencies<T, E: Swift.Error>(
-        _ modify: @escaping (inout Dependency.Values) -> Void,
-        operation: nonisolated(nonsending) () async throws(E) -> T
-    ) async throws(E) -> T {
+        public static func withDependencies<T, E: Swift.Error>(
+            _ modify: @escaping (inout Dependency.Values) -> Void,
+            operation: nonisolated(nonsending) () async throws(E) -> T
+        ) async throws(E) -> T
+    {
         try await Dependencies.withDependencies(mode: .test, modify, operation: operation)
     }
 }

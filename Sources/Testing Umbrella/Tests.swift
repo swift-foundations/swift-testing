@@ -70,7 +70,8 @@
 @freestanding(declaration, names: named(Test))
 public macro Tests(
     snapshots: Test.Snapshot.Configuration = .default
-) = #externalMacro(
-    module: "Testing_Macros_Implementation",
-    type: "TestsMacro"
-)
+) =
+    #externalMacro(
+        module: "Testing_Macros_Implementation",
+        type: "TestsMacro"
+    )

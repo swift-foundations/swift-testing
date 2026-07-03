@@ -9,8 +9,8 @@
 //
 // ===----------------------------------------------------------------------===//
 
-public import Test_Primitives
 internal import Environment
+public import Test_Primitives
 
 extension Testing {
     /// Configuration for test execution.
@@ -43,8 +43,8 @@ extension Testing {
         }
 
         /// Current configuration loaded from environment variables.
-        public static var current: Configuration {
-            var config = Configuration()
+        public static var current: Self {
+            var config = Self()
 
             if let filter = Environment.read("SWIFT_TEST_FILTER") {
                 config.filter = filter
@@ -69,10 +69,12 @@ extension Testing {
                 switch outputValue.lowercased() {
                 case "console":
                     config.output.format = .console
+
                 case "json":
                     config.output.format = .json
+
                 default:
-                    break // keep default (.tee)
+                    break  // keep default (.tee)
                 }
             }
 
@@ -85,5 +87,3 @@ extension Testing {
         }
     }
 }
-
-

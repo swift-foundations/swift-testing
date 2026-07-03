@@ -14,8 +14,6 @@ import SwiftSyntaxMacroExpansion
 public import SwiftSyntaxMacros
 public import SwiftSyntaxMacrosGenericTestSupport
 public import Test_Primitives
-public import Tests
-
 /// Asserts that a macro expands to the expected source code.
 ///
 /// This function bridges `SwiftSyntaxMacrosGenericTestSupport` to Swift Testing
@@ -51,6 +49,8 @@ public import Tests
 ///   - filePath: Source location info.
 ///   - line: Source location info.
 ///   - column: Source location info.
+public import Tests
+
 public func assertMacroExpansion(
     _ originalSource: Swift.String,
     expandedSource expectedExpandedSource: Swift.String,
@@ -75,15 +75,17 @@ public func assertMacroExpansion(
         testFileName: testFileName,
         indentationWidth: indentationWidth,
         failureHandler: { spec in
-            failures.append((
-                message: spec.message,
-                location: Source.Location(
-                    fileID: spec.location.fileID,
-                    filePath: spec.location.filePath,
-                    line: Int(spec.location.line),
-                    column: Int(spec.location.column)
+            failures.append(
+                (
+                    message: spec.message,
+                    location: Source.Location(
+                        fileID: spec.location.fileID,
+                        filePath: spec.location.filePath,
+                        line: Int(spec.location.line),
+                        column: Int(spec.location.column)
+                    )
                 )
-            ))
+            )
         },
         fileID: fileID,
         filePath: filePath,

@@ -35,7 +35,8 @@
 public macro expect(
     _ condition: Bool,
     _ comment: Test.Text? = nil
-) -> Test.Expectation = #externalMacro(
-    module: "Testing_Macros_Implementation",
-    type: "ExpectMacro"
-)
+) -> Test.Expectation =
+    #externalMacro(
+        module: "Testing_Macros_Implementation",
+        type: "ExpectMacro"
+    )

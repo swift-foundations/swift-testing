@@ -49,12 +49,13 @@ public struct RequireMacro: ExpressionMacro {
 private func expandConditionMacro(
     _ node: some FreestandingMacroExpansionSyntax,
     function: String
-) throws -> ExprSyntax {
+) throws(ConditionMacroError) -> ExprSyntax {
     guard let condition = node.arguments.first?.expression else {
         throw ConditionMacroError.missingCondition
     }
 
-    let comment = node.arguments.count > 1
+    let comment =
+        node.arguments.count > 1
         ? (node.arguments.dropFirst().first?.expression.description ?? "nil")
         : "nil"
 
@@ -70,7 +71,7 @@ private func expandConditionMacro(
         """
 }
 
-private enum ConditionMacroError: Error, CustomStringConvertible {
+private enum ConditionMacroError: Swift.Error, CustomStringConvertible {
     case missingCondition
 
     var description: String {

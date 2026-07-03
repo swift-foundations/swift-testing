@@ -36,10 +36,11 @@
 /// - `.enabled(_:)`: Conditionally enable/disable
 /// - `.serialized`: Run serially (not in parallel)
 @attached(peer, names: prefixed(__swift_test_accessor_), prefixed(__swift_test_record_))
-public macro Test(_ traits: Test.Trait.Collection.Modifier...) = #externalMacro(
-    module: "Testing_Macros_Implementation",
-    type: "TestMacro"
-)
+public macro Test(_ traits: Test.Trait.Collection.Modifier...) =
+    #externalMacro(
+        module: "Testing_Macros_Implementation",
+        type: "TestMacro"
+    )
 
 /// Marks a function as a parametric test that runs once per argument.
 ///
@@ -64,10 +65,11 @@ public macro Test(_ traits: Test.Trait.Collection.Modifier...) = #externalMacro(
 public macro Test(
     _ traits: Test.Trait.Collection.Modifier...,
     arguments collection: Any
-) = #externalMacro(
-    module: "Testing_Macros_Implementation",
-    type: "TestMacro"
-)
+) =
+    #externalMacro(
+        module: "Testing_Macros_Implementation",
+        type: "TestMacro"
+    )
 
 /// Marks a function as a parametric test over the Cartesian product of two collections.
 ///
@@ -86,7 +88,8 @@ public macro Test(
     _ traits: Test.Trait.Collection.Modifier...,
     arguments collection1: Any,
     _ collection2: Any
-) = #externalMacro(
-    module: "Testing_Macros_Implementation",
-    type: "TestMacro"
-)
+) =
+    #externalMacro(
+        module: "Testing_Macros_Implementation",
+        type: "TestMacro"
+    )

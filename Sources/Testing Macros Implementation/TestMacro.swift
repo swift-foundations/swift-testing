@@ -32,14 +32,15 @@ public struct TestMacro: PeerMacro {
         // (TokenSyntax interpolation into ExprSyntax drops backtick identifiers silently)
         let funcRef = funcDecl.name.trimmedDescription
 
-
         // Normalize function name for use in generated identifiers
         // (backtick names may contain spaces)
-        let normalizedName = String(funcName.map { char in
-            if char == " " { return "_" as Character }
-            if char.isLetter || char.isNumber || char == "_" { return char }
-            return "_" as Character
-        })
+        let normalizedName = String(
+            funcName.map { char in
+                if char == " " { return "_" as Character }
+                if char.isLetter || char.isNumber || char == "_" { return char }
+                return "_" as Character
+            }
+        )
 
         // Generate unique names using the macro context
         let accessorName = context.makeUniqueName("accessor_\(normalizedName)")
@@ -99,7 +100,7 @@ public struct TestMacro: PeerMacro {
             let awaitKeyword = isAsync ? "await " : ""
 
             if let typeRef {
-                let body = "let instance = \(typeRef)(); \(loopOpen)\(tryKeyword)\(awaitKeyword)instance.\(funcRef)(\(callArgs))\(loopClose)"
+                let body = "let suite = \(typeRef)(); \(loopOpen)\(tryKeyword)\(awaitKeyword)suite.\(funcRef)(\(callArgs))\(loopClose)"
                 if isAsync {
                     bodyExpr = "Testing.__TestBody.async { \(raw: body) }"
                 } else {
@@ -115,9 +116,9 @@ public struct TestMacro: PeerMacro {
             }
         } else if let typeRef {
             if isAsync {
-                bodyExpr = "Testing.__TestBody.async { let instance = \(raw: typeRef)(); \(raw: tryKeyword)await instance.\(raw: funcRef)() }"
+                bodyExpr = "Testing.__TestBody.async { let suite = \(raw: typeRef)(); \(raw: tryKeyword)await suite.\(raw: funcRef)() }"
             } else {
-                bodyExpr = "Testing.__TestBody.sync { let instance = \(raw: typeRef)(); \(raw: tryKeyword)instance.\(raw: funcRef)() }"
+                bodyExpr = "Testing.__TestBody.sync { let suite = \(raw: typeRef)(); \(raw: tryKeyword)suite.\(raw: funcRef)() }"
             }
         } else {
             if isAsync {

@@ -126,4 +126,3 @@ func sectionRecord(
         )
         """
 }
-

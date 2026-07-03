@@ -36,7 +36,8 @@
 /// }
 /// ```
 @attached(member, names: prefixed(__swift_suite_factory_))
-public macro Suite(_ traits: Test.Trait.Collection.Modifier...) = #externalMacro(
-    module: "Testing_Macros_Implementation",
-    type: "SuiteMacro"
-)
+public macro Suite(_ traits: Test.Trait.Collection.Modifier...) =
+    #externalMacro(
+        module: "Testing_Macros_Implementation",
+        type: "SuiteMacro"
+    )

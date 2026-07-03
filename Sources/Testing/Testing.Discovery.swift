@@ -39,9 +39,9 @@ extension Testing {
 
             // Also check fallback section (older Darwin binaries use __DATA instead of __DATA_CONST)
             #if canImport(Darwin)
-            for bounds in Loader.Section.all(.swiftTestContentFallback) {
-                unsafe parseTestContentSection(bounds.buffer, into: &registry)
-            }
+                for bounds in Loader.Section.all(.swiftTestContentFallback) {
+                    unsafe parseTestContentSection(bounds.buffer, into: &registry)
+                }
             #endif
 
             return registry
@@ -106,8 +106,10 @@ extension Testing {
         ) {
             let kind = unsafe record.kind
 
-            guard kind == Test.__TestContentKind.test.rawValue
-               || kind == Test.__TestContentKind.suite.rawValue else {
+            guard
+                kind == Test.__TestContentKind.test.rawValue
+                    || kind == Test.__TestContentKind.suite.rawValue
+            else {
                 return
             }
 

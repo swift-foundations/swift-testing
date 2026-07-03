@@ -1,6 +1,6 @@
+import Test_Primitives
 import Testing
 import Testing_Test_Support
-import Test_Primitives
 
 extension Testing {
     @Suite
@@ -43,7 +43,8 @@ extension Testing.MacroSupportTest.Unit {
     @Testing.Test
     func testTraitResolvesToTestTrait() {
         let trait: Testing.__TestTrait = .enabled(if: true)
-        if case .enabled(true, _) = trait.kind {} else {
+        if case .enabled(true, _) = trait.kind {
+        } else {
             #expect(false, "Expected .enabled(true) trait")
         }
     }

@@ -1,6 +1,6 @@
 import Testing
-import Testing_Test_Support
 import Testing_Macros_Implementation
+import Testing_Test_Support
 
 @Suite
 struct MacroExpansionTests {
@@ -17,15 +17,15 @@ extension MacroExpansionTests.Unit {
             #expect(x == 1)
             """,
             expandedSource: """
-            Testing.__expect(
-                x == 1,
-                nil,
-                fileID: #fileID,
-                filePath: #filePath,
-                line: #line,
-                column: #column
-            )
-            """,
+                Testing.__expect(
+                    x == 1,
+                    nil,
+                    fileID: #fileID,
+                    filePath: #filePath,
+                    line: #line,
+                    column: #column
+                )
+                """,
             macros: ["expect": ExpectMacro.self]
         )
     }
@@ -37,15 +37,15 @@ extension MacroExpansionTests.Unit {
             #expect(x == 1, "values should match")
             """,
             expandedSource: """
-            Testing.__expect(
-                x == 1,
-                "values should match",
-                fileID: #fileID,
-                filePath: #filePath,
-                line: #line,
-                column: #column
-            )
-            """,
+                Testing.__expect(
+                    x == 1,
+                    "values should match",
+                    fileID: #fileID,
+                    filePath: #filePath,
+                    line: #line,
+                    column: #column
+                )
+                """,
             macros: ["expect": ExpectMacro.self]
         )
     }
@@ -57,15 +57,15 @@ extension MacroExpansionTests.Unit {
             #require(isValid)
             """,
             expandedSource: """
-            try Testing.__require(
-                isValid,
-                nil,
-                fileID: #fileID,
-                filePath: #filePath,
-                line: #line,
-                column: #column
-            )
-            """,
+                try Testing.__require(
+                    isValid,
+                    nil,
+                    fileID: #fileID,
+                    filePath: #filePath,
+                    line: #line,
+                    column: #column
+                )
+                """,
             macros: ["require": RequireMacro.self]
         )
     }
@@ -77,15 +77,15 @@ extension MacroExpansionTests.Unit {
             #require(isValid, "must be valid")
             """,
             expandedSource: """
-            try Testing.__require(
-                isValid,
-                "must be valid",
-                fileID: #fileID,
-                filePath: #filePath,
-                line: #line,
-                column: #column
-            )
-            """,
+                try Testing.__require(
+                    isValid,
+                    "must be valid",
+                    fileID: #fileID,
+                    filePath: #filePath,
+                    line: #line,
+                    column: #column
+                )
+                """,
             macros: ["require": RequireMacro.self]
         )
     }
@@ -99,16 +99,16 @@ extension MacroExpansionTests.Unit {
             }
             """,
             expandedSource: """
-            extension MyType {
-                @Suite enum Test {
-                    @Suite(.exclusive(group: "MyType")) struct Unit {}
-                    @Suite(.exclusive(group: "MyType")) struct EdgeCase {}
-                    @Suite(.exclusive(group: "MyType")) struct Integration {}
-                    @Suite(.exclusive, .serialized) struct Performance {}
-                    @Suite(.serialized) struct Snapshot {}
+                extension MyType {
+                    @Suite enum Test {
+                        @Suite(.exclusive(group: "MyType")) struct Unit {}
+                        @Suite(.exclusive(group: "MyType")) struct EdgeCase {}
+                        @Suite(.exclusive(group: "MyType")) struct Integration {}
+                        @Suite(.exclusive, .serialized) struct Performance {}
+                        @Suite(.serialized) struct Snapshot {}
+                    }
                 }
-            }
-            """,
+                """,
             macros: ["Tests": TestsMacro.self]
         )
     }

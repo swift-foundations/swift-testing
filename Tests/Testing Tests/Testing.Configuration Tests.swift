@@ -27,7 +27,8 @@ extension Testing.Configuration.Test.Unit {
     @Testing.Test
     func initCreatesDefaultConfigurationWithAutomaticConcurrency() {
         let config = Testing.Configuration()
-        if case .automatic = config.concurrency {} else {
+        if case .automatic = config.concurrency {
+        } else {
             #expect(false, "Expected .automatic concurrency")
         }
     }
@@ -36,7 +37,8 @@ extension Testing.Configuration.Test.Unit {
     func initCreatesDefaultConfigurationWithTeeOutputFormat() {
         // Default is .tee (console + structured JSONL) since e1e5cff.
         let config = Testing.Configuration()
-        if case .tee = config.output.format {} else {
+        if case .tee = config.output.format {
+        } else {
             #expect(false, "Expected .tee output format")
         }
     }
@@ -55,10 +57,12 @@ extension Testing.Configuration.Test.Unit {
             output: .init(format: .json)
         )
         #expect(config.filter == "MyTest")
-        if case .serial = config.concurrency {} else {
+        if case .serial = config.concurrency {
+        } else {
             #expect(false, "Expected .serial concurrency")
         }
-        if case .json = config.output.format {} else {
+        if case .json = config.output.format {
+        } else {
             #expect(false, "Expected .json output format")
         }
     }

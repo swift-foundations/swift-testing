@@ -9,10 +9,10 @@
 //
 // ===----------------------------------------------------------------------===//
 
-import XCTest
+import Test_Primitives
 import Testing
 import Testing_Test_Support
-import Test_Primitives
+import XCTest
 
 // MARK: - XCTest Bridge
 //

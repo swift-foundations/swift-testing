@@ -9,9 +9,8 @@
 //
 // ===----------------------------------------------------------------------===//
 
-// Re-export Testing Core for Test namespace
-@_exported public import Testing_Core
-
 // Re-export Effects and Effects Testing for effect testing utilities
 @_exported public import Effects
 @_exported public import Effects_Testing
+// Re-export Testing Core for Test namespace
+@_exported public import Testing_Core

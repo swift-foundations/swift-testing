@@ -1,6 +1,6 @@
+import Test_Primitives
 import Testing
 import Testing_Test_Support
-import Test_Primitives
 
 extension Testing {
     @Suite

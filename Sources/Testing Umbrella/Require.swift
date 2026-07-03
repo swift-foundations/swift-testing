@@ -31,17 +31,19 @@
 public macro require(
     _ condition: Bool,
     _ comment: Test.Text? = nil
-) = #externalMacro(
-    module: "Testing_Macros_Implementation",
-    type: "RequireMacro"
-)
+) =
+    #externalMacro(
+        module: "Testing_Macros_Implementation",
+        type: "RequireMacro"
+    )
 
 /// Unwraps an optional or throws on nil.
 @freestanding(expression)
 public macro require<T>(
     _ optional: T?,
     _ comment: Test.Text? = nil
-) -> T = #externalMacro(
-    module: "Testing_Macros_Implementation",
-    type: "RequireMacro"
-)
+) -> T =
+    #externalMacro(
+        module: "Testing_Macros_Implementation",
+        type: "RequireMacro"
+    )

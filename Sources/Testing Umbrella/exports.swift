@@ -16,11 +16,10 @@
 // includes Tests_Inline_Snapshot, Tests_Snapshot, Tests_Performance),
 // Dependencies, and Time_Primitives.
 
-// Re-export core implementation (brings all testing infrastructure)
-@_exported public import Testing_Core
-
 // Re-export SwiftSyntax types for macro testing
 // Users need: Macro, DiagnosticSpec, Trivia for assertMacroExpansion()
 @_exported public import SwiftSyntax
 @_exported public import SwiftSyntaxMacros
 @_exported public import SwiftSyntaxMacrosGenericTestSupport
+// Re-export core implementation (brings all testing infrastructure)
+@_exported public import Testing_Core

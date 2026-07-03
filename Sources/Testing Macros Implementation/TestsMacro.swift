@@ -106,12 +106,10 @@ public struct TestsMacro: DeclarationMacro {
             if argument.label?.text == "snapshots" {
                 let desc = argument.expression.description
                 // Trim whitespace without Foundation
-                let trimmed = String(desc.drop(while: { $0.isWhitespace }).reversed().drop(while: { $0.isWhitespace }).reversed())
-                return trimmed
+                return String(desc.drop(while: { $0.isWhitespace }).reversed().drop(while: { $0.isWhitespace }).reversed())
             }
         }
 
         return nil
     }
 }
-
