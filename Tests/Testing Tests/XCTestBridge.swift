@@ -94,8 +94,8 @@ final class ConfigurationTests: XCTestCase {
         Testing.Configuration.Test.Unit().initCreatesDefaultConfigurationWithAutomaticConcurrency()
     }
 
-    func testInitCreatesDefaultConfigurationWithConsoleOutputFormat() {
-        Testing.Configuration.Test.Unit().initCreatesDefaultConfigurationWithConsoleOutputFormat()
+    func testInitCreatesDefaultConfigurationWithTeeOutputFormat() {
+        Testing.Configuration.Test.Unit().initCreatesDefaultConfigurationWithTeeOutputFormat()
     }
 
     func testInitCreatesDefaultConfigurationWithNilOutputPath() {

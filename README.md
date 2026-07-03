@@ -10,7 +10,7 @@ The macro surface mirrors the familiar `@Test` / `#expect` idiom, so test code r
 
 ## Key Features
 
-- **Macro test authoring** — `@Test`, `@Suite`, `#expect`, `#require` with traits (`.tag(_:)`, `.timeLimit(_:)`, `.enabled(_:)`, `.serialized`)
+- **Macro test authoring** — `@Test`, `@Suite`, `#expect`, `#require` with traits (`.tag(_:)`, `.timeLimit(_:)`, `.enabled(if:)`, `.serialized`)
 - **Expression capture** — `#expect(result == 42)` records the source expression and captured values in failure diagnostics
 - **Parametric tests** — `@Test(arguments:)` runs once per element, or over the Cartesian product of two collections
 - **Runtime discovery** — section-based enumeration of `@Test` functions with a dynamic-loader fallback; no manifest to maintain
@@ -53,8 +53,8 @@ Tests run through the package's own entry point:
 ```swift
 @main
 struct TestRunner {
-    static func main() async {
-        await Testing.main()
+    static func main() async throws {
+        try await Testing.main()
     }
 }
 ```

@@ -33,10 +33,11 @@ extension Testing.Configuration.Test.Unit {
     }
 
     @Testing.Test
-    func initCreatesDefaultConfigurationWithConsoleOutputFormat() {
+    func initCreatesDefaultConfigurationWithTeeOutputFormat() {
+        // Default is .tee (console + structured JSONL) since e1e5cff.
         let config = Testing.Configuration()
-        if case .console = config.output.format {} else {
-            #expect(false, "Expected .console output format")
+        if case .tee = config.output.format {} else {
+            #expect(false, "Expected .tee output format")
         }
     }
 
