@@ -19,6 +19,7 @@
 // WHEN TO REMOVE: When macro codegen can use nested type references (Testing.Suite.Registration).
 // TRACKING: naming-implementation-audit-swift-tests-swift-testing.md N46, N48
 
+internal import Ownership_Primitives
 public import Test_Primitives
 public import Tests
 
@@ -54,10 +55,32 @@ extension Testing {
     /// Unambiguous reference to Test.Trait.Collection.Modifier for macro expansions.
     public typealias __TestTraitCollectionModifier = Test.Trait.Collection.Modifier
 
-    /// Box type for passing registrations through C-convention accessors.
-    /// Delegates to Test.Box (= Ownership.Shared) so macro-generated code
-    /// and section-based discovery use the same concrete type.
-    public typealias Box<T: Sendable> = Test.Box<T>
+    /// Boxes a registration value into an opaque pointer for transfer
+    /// through a C-convention accessor.
+    ///
+    /// `Ownership.Box` (the prior boxing vehicle) is a copy-on-write struct,
+    /// not a class, so it no longer satisfies the `AnyObject` constraint
+    /// `Unmanaged.passRetained` requires. `Ownership.Transfer.Erased`
+    /// boxes any payload type directly into a single allocation that
+    /// carries its own destructor, so the accessor closure needs no
+    /// intermediate box type at all — see ``unbox(_:as:)`` for the paired
+    /// consumer-side read.
+    @unsafe
+    public static func box<T: Sendable>(_ value: T) -> UnsafeMutableRawPointer {
+        unsafe Ownership.Transfer.Erased.Outgoing.make(value)
+    }
+
+    /// Unboxes a pointer previously produced by ``box(_:)``, consuming and
+    /// deallocating the box.
+    ///
+    /// - Parameters:
+    ///   - ptr: The pointer returned by ``box(_:)``.
+    ///   - type: The payload type the box was created with (producer and
+    ///     consumer agree on this out of band via the test content record kind).
+    @unsafe
+    public static func unbox<T: Sendable>(_ ptr: UnsafeRawPointer, as type: T.Type) -> T {
+        unsafe Ownership.Transfer.Erased.Outgoing.consume(UnsafeMutableRawPointer(mutating: ptr))
+    }
 
     /// Unambiguous reference to Test.__TestContentRecordContainer for macro expansions.
     /// The macro emits enums conforming to this protocol for type-metadata-based discovery.

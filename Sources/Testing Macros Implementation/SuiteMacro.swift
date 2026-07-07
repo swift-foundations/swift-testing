@@ -62,8 +62,7 @@ public struct SuiteMacro: MemberMacro {
                     ),
                     modifiers: \(raw: traits)
                 )
-                let boxed = Testing.Box(registration)
-                let ptr = unsafe Unmanaged.passRetained(boxed).toOpaque()
+                let ptr = unsafe Testing.box(registration)
                 unsafe outValue.storeBytes(of: ptr, as: UnsafeRawPointer?.self)
                 return true
             }

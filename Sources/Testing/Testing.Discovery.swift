@@ -11,7 +11,6 @@
 
 internal import Loader
 internal import Loader_Primitives
-internal import Ownership_Primitives
 
 extension Testing {
     /// Test and suite discovery via section enumeration and symbol lookup.
@@ -130,10 +129,10 @@ extension Testing {
             }
 
             if kind == Test.__TestContentKind.suite.rawValue {
-                let reg = unsafe Ownership.Transfer.Retained<Test.Box<Test.Suite.Registration>>.Outgoing(ptr).consume().value
+                let reg = unsafe Testing.unbox(ptr, as: Test.Suite.Registration.self)
                 registry.add(suite: reg)
             } else {
-                let reg = unsafe Ownership.Transfer.Retained<Test.Box<Test.Registration>>.Outgoing(ptr).consume().value
+                let reg = unsafe Testing.unbox(ptr, as: Test.Registration.self)
                 registry.add(id: reg.id, modifiers: reg.modifiers, body: reg.body)
             }
         }
