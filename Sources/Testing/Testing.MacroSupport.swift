@@ -13,9 +13,6 @@
 // When user code creates a local `Test` type (e.g., via #Tests), it shadows
 // the global Test namespace. These typealiases provide stable references.
 //
-// Four-part WORKAROUND template verified by hand (all four parts present
-// below); the rule's regex only detects the marker's presence.
-// swiftlint:disable:next workaround_marker_present
 // WORKAROUND: Compound typealias names (__TestID, SuiteRegistration, etc.) [API-NAME-001]
 // WHY: Macro-generated code references these by fully-qualified name (Testing.__TestID, etc.).
 //   Renaming requires updating all macro codegen sites and verifying ABI stability.

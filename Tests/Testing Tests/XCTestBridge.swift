@@ -28,10 +28,6 @@ import XCTest
 // use our #expect / #require macros internally; failures are mapped to XCTest
 // via XCTAssert at the suite level.
 //
-// Four-part WORKAROUND template verified by hand (WORKAROUND/WHY/WHEN TO
-// REMOVE/TRACKING all present below); the rule's regex only detects the
-// marker's presence, not the other three parts.
-// swiftlint:disable:next workaround_marker_present
 // WORKAROUND: __swift5_tests section records use a different layout than
 // Apple's swift-testing (absolute vs relative pointers). Section-based
 // discovery crashes when the Swift runtime parses our records during image
