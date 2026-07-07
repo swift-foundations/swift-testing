@@ -51,8 +51,8 @@ func buildQualifiedSuiteName(
 extension Syntax {
     /// Extracts the type name from a declaration group syntax node.
     ///
-    /// For extensions, returns the extended type's trimmed description (e.g., `"IO.Benchmark"`).
-    /// For struct/class/enum/actor, returns the simple name (e.g., `"Throughput"`).
+    /// For extensions, returns the extended type's trimmed description, such as `"IO.Benchmark"`.
+    /// For struct/class/enum/actor, returns the simple name, such as `"Throughput"`.
     var asDeclGroupName: String? {
         if let decl = self.as(StructDeclSyntax.self) {
             return decl.name.text
@@ -73,7 +73,7 @@ extension Syntax {
 
 /// Extracts trait expressions from macro attribute arguments.
 ///
-/// - Parameter node: The attribute syntax (e.g., `@Test("name", .serialized)`)
+/// - Parameter node: The attribute syntax, such as `@Test("name", .serialized)`
 /// - Parameter stopAtArguments: When `true`, stops collecting before the `arguments:` label.
 ///   Use `true` for `@Test` (which has `arguments:`), `false` for `@Suite`.
 /// - Returns: A string like `["name", .serialized]` or `[]`.

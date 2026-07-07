@@ -55,6 +55,9 @@ public func assertMacroExpansion(
     _ originalSource: Swift.String,
     expandedSource expectedExpandedSource: Swift.String,
     diagnostics: [DiagnosticSpec] = [],
+    // Threads directly into SwiftSyntaxMacroExpansion.MacroSpec.init(type:
+    // Macro.Type) — the external API's own parameter shape.
+    // swiftlint:disable:next no_any_protocol_existential
     macros: [Swift.String: any Macro.Type],
     testModuleName: Swift.String = "TestModule",
     testFileName: Swift.String = "test.swift",

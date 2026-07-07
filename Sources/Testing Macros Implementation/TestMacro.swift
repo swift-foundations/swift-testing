@@ -22,6 +22,8 @@ public struct TestMacro: PeerMacro {
         of node: AttributeSyntax,
         providingPeersOf declaration: some DeclSyntaxProtocol,
         in context: some MacroExpansionContext
+            // Signature forced by external protocol PeerMacro (untyped `throws`).
+            // swiftlint:disable:next typed_throws_required
     ) throws -> [DeclSyntax] {
         guard let funcDecl = declaration.as(FunctionDeclSyntax.self) else {
             throw Error.requiresFunction
@@ -221,7 +223,7 @@ public struct TestMacro: PeerMacro {
     ///
     /// When a single argument collection is used with multiple function parameters,
     /// tuple destructuring is applied: the collection elements are accessed as
-    /// `__arg0.0`, `__arg0.1`, etc.
+    /// `__arg0.0`, `__arg0.1`, and so on.
     ///
     /// - `@Test(arguments: [1, 2])` with `func test(n: Int)` → `test(n: __arg0)`
     /// - `@Test(arguments: [("a", 1)])` with `func test(s: String, n: Int)` → `test(s: __arg0.0, n: __arg0.1)`

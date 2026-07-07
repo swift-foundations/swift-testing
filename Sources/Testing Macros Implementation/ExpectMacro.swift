@@ -22,6 +22,8 @@ public struct ExpectMacro: ExpressionMacro {
     public static func expansion(
         of node: some FreestandingMacroExpansionSyntax,
         in context: some MacroExpansionContext
+            // Signature forced by external protocol ExpressionMacro (untyped `throws`).
+            // swiftlint:disable:next typed_throws_required
     ) throws -> ExprSyntax {
         try expandConditionMacro(node, function: "__expect")
     }
@@ -37,6 +39,8 @@ public struct RequireMacro: ExpressionMacro {
     public static func expansion(
         of node: some FreestandingMacroExpansionSyntax,
         in context: some MacroExpansionContext
+            // Signature forced by external protocol ExpressionMacro (untyped `throws`).
+            // swiftlint:disable:next typed_throws_required
     ) throws -> ExprSyntax {
         try expandConditionMacro(node, function: "__require")
     }

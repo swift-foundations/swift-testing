@@ -95,7 +95,7 @@ extension Testing {
         /// then dispatches based on kind:
         /// - `.test` records are unboxed as ``Test/Registration`` and added as tests.
         /// - `.suite` records are unboxed as ``Test/Suite/Registration`` and added as suites.
-        /// - Other kinds (e.g., `.exitTest`) are skipped.
+        /// - Other kinds, such as `.exitTest`, are skipped.
         ///
         /// - Parameters:
         ///   - record: The test content record tuple from a binary section or type metadata.
@@ -153,6 +153,10 @@ extension Testing {
             let types = Loader.types(named: "__🟡$")
 
             for type in types {
+                // Dynamic type-metadata discovery: `types` are runtime-scanned
+                // from `__swift5_types` with no compile-time known conformer,
+                // so an existential cast is the only way to test conformance.
+                // swiftlint:disable:next no_any_protocol_existential
                 guard let container = type as? any Test.__TestContentRecordContainer.Type else {
                     continue
                 }

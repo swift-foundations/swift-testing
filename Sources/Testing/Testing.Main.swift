@@ -67,7 +67,7 @@ extension Testing {
 
     /// Runs all discovered tests.
     ///
-    /// Use this for programmatic test execution (e.g., XCTest bridges).
+    /// Use this for programmatic test execution, such as XCTest bridges.
     /// Discovers tests from section records and executes them with console output.
     ///
     /// - Throws: ``Testing/Run/Error/failed(_:)`` if any test failed.

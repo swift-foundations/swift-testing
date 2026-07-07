@@ -32,6 +32,8 @@ public struct SuiteMacro: MemberMacro {
         providingMembersOf declaration: some DeclGroupSyntax,
         conformingTo protocols: [TypeSyntax],
         in context: some MacroExpansionContext
+            // Signature forced by external protocol MemberMacro (untyped `throws`).
+            // swiftlint:disable:next typed_throws_required
     ) throws -> [DeclSyntax] {
         let simpleName = typeName(from: declaration)
         let suiteName = buildQualifiedSuiteName(from: context, declarationName: simpleName)

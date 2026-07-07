@@ -12,6 +12,7 @@
 /// Marks a type as a test suite.
 ///
 /// The `@Suite` macro provides trait inheritance to all contained tests.
+///
 /// Suite traits are merged with test traits according to inheritance rules:
 /// - `tags`: union (suite + test)
 /// - `enabled`: AND (disable wins)

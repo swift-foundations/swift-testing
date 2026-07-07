@@ -51,6 +51,8 @@ public struct TestsMacro: DeclarationMacro {
     public static func expansion(
         of node: some FreestandingMacroExpansionSyntax,
         in context: some MacroExpansionContext
+            // Signature forced by external protocol DeclarationMacro (untyped `throws`).
+            // swiftlint:disable:next typed_throws_required
     ) throws -> [DeclSyntax] {
         // Extract snapshot configuration if provided
         let snapshotConfig = extractSnapshotConfiguration(from: node)
