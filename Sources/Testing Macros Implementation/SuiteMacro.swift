@@ -26,7 +26,9 @@ import SwiftSyntaxMacros
 ///     @Test func subtraction() { ... }
 /// }
 /// ```
-public struct SuiteMacro: MemberMacro {
+public struct SuiteMacro: MemberMacro {}
+
+extension SuiteMacro {
     public static func expansion(
         of node: AttributeSyntax,
         providingMembersOf declaration: some DeclGroupSyntax,

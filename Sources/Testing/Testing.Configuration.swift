@@ -41,49 +41,51 @@ extension Testing {
             self.concurrency = .automatic
             self.output = Output()
         }
+    }
+}
 
-        /// Current configuration loaded from environment variables.
-        public static var current: Self {
-            var config = Self()
+extension Testing.Configuration {
+    /// Current configuration loaded from environment variables.
+    public static var current: Self {
+        var config = Self()
 
-            if let filter = Environment.read("SWIFT_TEST_FILTER") {
-                config.filter = filter
-            }
-
-            if let tagsString = Environment.read("SWIFT_TEST_TAGS") {
-                let tags = tagsString.split(separator: ",").map { tag in
-                    Swift.String(tag.drop(while: \.isWhitespace))
-                }
-                config.tags = Swift.Set(tags)
-            }
-
-            if let parallelString = Environment.read("SWIFT_TEST_PARALLEL") {
-                if parallelString == "0" {
-                    config.concurrency = .serial
-                } else if let n = Int(parallelString), n > 0 {
-                    config.concurrency = .limited(n)
-                }
-            }
-
-            if let outputValue = Environment.read("SWIFT_TEST_OUTPUT") {
-                switch outputValue.lowercased() {
-                case "console":
-                    config.output.format = .console
-
-                case "json":
-                    config.output.format = .json
-
-                default:
-                    break  // keep default (.tee)
-                }
-            }
-
-            if let path = Environment.read("SWIFT_TEST_OUTPUT_PATH") {
-                config.output.path = path
-                config.output.structuredPath = path
-            }
-
-            return config
+        if let filter = Environment.read("SWIFT_TEST_FILTER") {
+            config.filter = filter
         }
+
+        if let tagsString = Environment.read("SWIFT_TEST_TAGS") {
+            let tags = tagsString.split(separator: ",").map { tag in
+                Swift.String(tag.drop(while: \.isWhitespace))
+            }
+            config.tags = Swift.Set(tags)
+        }
+
+        if let parallelString = Environment.read("SWIFT_TEST_PARALLEL") {
+            if parallelString == "0" {
+                config.concurrency = .serial
+            } else if let n = Int(parallelString), n > 0 {
+                config.concurrency = .limited(n)
+            }
+        }
+
+        if let outputValue = Environment.read("SWIFT_TEST_OUTPUT") {
+            switch outputValue.lowercased() {
+            case "console":
+                config.output.format = .console
+
+            case "json":
+                config.output.format = .json
+
+            default:
+                break  // keep default (.tee)
+            }
+        }
+
+        if let path = Environment.read("SWIFT_TEST_OUTPUT_PATH") {
+            config.output.path = path
+            config.output.structuredPath = path
+        }
+
+        return config
     }
 }

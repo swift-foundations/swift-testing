@@ -24,7 +24,7 @@ extension Testing {
     ///
     /// - Returns: Never returns; exits the process.
     public static func __swiftPMEntryPoint() async -> Never {
-        do {
+        do throws(Run.Error) {
             try await run(registry: Discovery.all())
             Kernel.Process.Exit.now(0)
         } catch {
@@ -113,7 +113,7 @@ extension Testing {
         runner.postRunActions.append {
             let state = Test.Snapshot.Inline.state
             guard !state.isEmpty else { return }
-            do {
+            do throws(Test.Snapshot.Inline.Rewriter.Error) {
                 try Test.Snapshot.Inline.Rewriter.writeAll(from: state.drain())
             } catch {
                 // Non-fatal: inline snapshot write failure should not change test results.

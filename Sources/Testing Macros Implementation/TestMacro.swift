@@ -17,7 +17,9 @@ import SwiftSyntaxMacros
 /// Expands to emit:
 /// 1. An accessor closure that creates a `Testing.Registration`
 /// 2. A section record that references the accessor (for automatic discovery)
-public struct TestMacro: PeerMacro {
+public struct TestMacro: PeerMacro {}
+
+extension TestMacro {
     public static func expansion(
         of node: AttributeSyntax,
         providingPeersOf declaration: some DeclSyntaxProtocol,
@@ -265,12 +267,14 @@ public struct TestMacro: PeerMacro {
 extension TestMacro {
     enum Error: Swift.Error, CustomStringConvertible {
         case requiresFunction
+    }
+}
 
-        var description: String {
-            switch self {
-            case .requiresFunction:
-                return "@Test can only be applied to functions"
-            }
+extension TestMacro.Error {
+    var description: String {
+        switch self {
+        case .requiresFunction:
+            return "@Test can only be applied to functions"
         }
     }
 }

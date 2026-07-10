@@ -18,170 +18,172 @@ extension Testing {
     /// Primary discovery uses section-based enumeration of test content records
     /// (both `@Test` and `@Suite`). Falls back to dlsym-based lookup if
     /// section discovery finds nothing.
-    public struct Discovery: Sendable {
+    public struct Discovery: Sendable {}
+}
 
-        // MARK: - Primary: Section-Based Discovery
+extension Testing.Discovery {
 
-        /// Discovers all tests and suites from binary section records.
-        ///
-        /// Enumerates the `__swift5_tests` section (or platform equivalent)
-        /// to find test content records emitted by `@Test` and `@Suite` macro expansions.
-        ///
-        /// - Returns: A registry containing all discovered tests and suites.
-        public static func sections() -> Test.Plan.Registry {
-            var registry = Test.Plan.Registry()
+    // MARK: - Primary: Section-Based Discovery
 
-            // Enumerate all test content sections
-            for bounds in Loader.Section.all(.swiftTestContent) {
+    /// Discovers all tests and suites from binary section records.
+    ///
+    /// Enumerates the `__swift5_tests` section (or platform equivalent)
+    /// to find test content records emitted by `@Test` and `@Suite` macro expansions.
+    ///
+    /// - Returns: A registry containing all discovered tests and suites.
+    public static func sections() -> Test.Plan.Registry {
+        var registry = Test.Plan.Registry()
+
+        // Enumerate all test content sections
+        for bounds in Loader.Section.all(.swiftTestContent) {
+            unsafe parseTestContentSection(bounds.buffer, into: &registry)
+        }
+
+        // Also check fallback section (older Darwin binaries use __DATA instead of __DATA_CONST)
+        #if canImport(Darwin)
+            for bounds in Loader.Section.all(.swiftTestContentFallback) {
                 unsafe parseTestContentSection(bounds.buffer, into: &registry)
             }
+        #endif
 
-            // Also check fallback section (older Darwin binaries use __DATA instead of __DATA_CONST)
-            #if canImport(Darwin)
-                for bounds in Loader.Section.all(.swiftTestContentFallback) {
-                    unsafe parseTestContentSection(bounds.buffer, into: &registry)
-                }
-            #endif
+        return registry
+    }
 
-            return registry
+    /// Parses test content records from a section buffer.
+    ///
+    /// Uses alignment-safe loading to handle potentially unaligned section data.
+    ///
+    /// - Parameters:
+    ///   - buffer: The raw section buffer containing test content records.
+    ///   - registry: The registry to add discovered tests to.
+    private static func parseTestContentSection(
+        _ buffer: UnsafeRawBufferPointer,
+        into registry: inout Test.Plan.Registry
+    ) {
+        let recordStride = unsafe MemoryLayout<Test.__TestContentRecord>.stride
+
+        // Validate section size is a multiple of record stride
+        guard buffer.count % recordStride == 0 else {
+            // Corrupt or unknown section format - skip silently
+            return
         }
 
-        /// Parses test content records from a section buffer.
-        ///
-        /// Uses alignment-safe loading to handle potentially unaligned section data.
-        ///
-        /// - Parameters:
-        ///   - buffer: The raw section buffer containing test content records.
-        ///   - registry: The registry to add discovered tests to.
-        private static func parseTestContentSection(
-            _ buffer: UnsafeRawBufferPointer,
-            into registry: inout Test.Plan.Registry
-        ) {
-            let recordStride = unsafe MemoryLayout<Test.__TestContentRecord>.stride
+        let recordCount = buffer.count / recordStride
 
-            // Validate section size is a multiple of record stride
-            guard buffer.count % recordStride == 0 else {
-                // Corrupt or unknown section format - skip silently
-                return
+        for j in 0..<recordCount {
+            let offset = j * recordStride
+
+            // Use alignment-safe loading by copying to stack-allocated storage
+            let record: Test.__TestContentRecord = unsafe withUnsafeTemporaryAllocation(
+                of: Test.__TestContentRecord.self,
+                capacity: 1
+            ) { temp in
+                unsafe UnsafeMutableRawPointer(temp.baseAddress!).copyMemory(
+                    from: buffer.baseAddress!.advanced(by: offset),
+                    byteCount: recordStride
+                )
+                return unsafe temp[0]
             }
 
-            let recordCount = buffer.count / recordStride
+            unsafe processRecord(record, into: &registry)
+        }
+    }
 
-            for j in 0..<recordCount {
-                let offset = j * recordStride
+    // MARK: - Record Processing
 
-                // Use alignment-safe loading by copying to stack-allocated storage
-                let record: Test.__TestContentRecord = unsafe withUnsafeTemporaryAllocation(
-                    of: Test.__TestContentRecord.self,
-                    capacity: 1
-                ) { temp in
-                    unsafe UnsafeMutableRawPointer(temp.baseAddress!).copyMemory(
-                        from: buffer.baseAddress!.advanced(by: offset),
-                        byteCount: recordStride
-                    )
-                    return unsafe temp[0]
-                }
+    /// Processes a single test content record into the registry.
+    ///
+    /// Calls the record's accessor to obtain a boxed registration,
+    /// then dispatches based on kind:
+    /// - `.test` records are unboxed as ``Test/Registration`` and added as tests.
+    /// - `.suite` records are unboxed as ``Test/Suite/Registration`` and added as suites.
+    /// - Other kinds, such as `.exitTest`, are skipped.
+    ///
+    /// - Parameters:
+    ///   - record: The test content record tuple from a binary section or type metadata.
+    ///   - registry: The registry to add discovered content to.
+    private static func processRecord(
+        _ record: Test.__TestContentRecord,
+        into registry: inout Test.Plan.Registry
+    ) {
+        let kind = unsafe record.kind
 
-                unsafe processRecord(record, into: &registry)
-            }
+        guard
+            kind == Test.__TestContentKind.test.rawValue
+                || kind == Test.__TestContentKind.suite.rawValue
+        else {
+            return
         }
 
-        // MARK: - Record Processing
-
-        /// Processes a single test content record into the registry.
-        ///
-        /// Calls the record's accessor to obtain a boxed registration,
-        /// then dispatches based on kind:
-        /// - `.test` records are unboxed as ``Test/Registration`` and added as tests.
-        /// - `.suite` records are unboxed as ``Test/Suite/Registration`` and added as suites.
-        /// - Other kinds, such as `.exitTest`, are skipped.
-        ///
-        /// - Parameters:
-        ///   - record: The test content record tuple from a binary section or type metadata.
-        ///   - registry: The registry to add discovered content to.
-        private static func processRecord(
-            _ record: Test.__TestContentRecord,
-            into registry: inout Test.Plan.Registry
-        ) {
-            let kind = unsafe record.kind
-
-            guard
-                kind == Test.__TestContentKind.test.rawValue
-                    || kind == Test.__TestContentKind.suite.rawValue
-            else {
-                return
-            }
-
-            guard let accessor = unsafe record.accessor else {
-                return
-            }
-
-            var registrationPtr: UnsafeRawPointer? = nil
-            let success = unsafe accessor(
-                &registrationPtr,
-                UnsafeRawPointer(bitPattern: 1)!,
-                UnsafeRawPointer?(nil),
-                0
-            )
-
-            guard success, let ptr = unsafe registrationPtr else {
-                return
-            }
-
-            if kind == Test.__TestContentKind.suite.rawValue {
-                let reg = unsafe Testing.unbox(ptr, as: Test.Suite.Registration.self)
-                registry.add(suite: reg)
-            } else {
-                let reg = unsafe Testing.unbox(ptr, as: Test.Registration.self)
-                registry.add(id: reg.id, modifiers: reg.modifiers, body: reg.body)
-            }
+        guard let accessor = unsafe record.accessor else {
+            return
         }
 
-        // MARK: - Legacy: Type Metadata-Based Discovery
+        var registrationPtr: UnsafeRawPointer? = nil
+        let success = unsafe accessor(
+            &registrationPtr,
+            UnsafeRawPointer(bitPattern: 1)!,
+            UnsafeRawPointer?(nil),
+            0
+        )
 
-        /// Discovers tests and suites from type metadata (legacy, Swift < 6.3).
-        ///
-        /// Scans `__swift5_types` for enum types named `__🟡$...` that conform to
-        /// `__TestContentRecordContainer`. Each matching type's
-        /// `__testContentRecord` property provides a test content record tuple.
-        ///
-        /// - Returns: A registry containing all discovered tests and suites.
-        public static func typeMetadata() -> Test.Plan.Registry {
-            var registry = Test.Plan.Registry()
-
-            let types = Loader.types(named: "__🟡$")
-
-            for type in types {
-                // Dynamic type-metadata discovery: `types` are runtime-scanned
-                // from `__swift5_types` with no compile-time known conformer,
-                // so an existential cast is the only way to test conformance.
-                // swiftlint:disable:next no_any_protocol_existential
-                guard let container = type as? any Test.__TestContentRecordContainer.Type else {
-                    continue
-                }
-
-                unsafe processRecord(container.__testContentRecord, into: &registry)
-            }
-
-            return registry
+        guard success, let ptr = unsafe registrationPtr else {
+            return
         }
 
-        // MARK: - Unified Discovery
+        if kind == Test.__TestContentKind.suite.rawValue {
+            let reg = unsafe Testing.unbox(ptr, as: Test.Suite.Registration.self)
+            registry.add(suite: reg)
+        } else {
+            let reg = unsafe Testing.unbox(ptr, as: Test.Registration.self)
+            registry.add(id: reg.id, modifiers: reg.modifiers, body: reg.body)
+        }
+    }
 
-        /// Discovers all tests using the best available method.
-        ///
-        /// Tries section-based discovery first, then falls back to
-        /// type-metadata discovery if no tests are found (Swift < 6.3).
-        ///
-        /// - Returns: A registry containing all discovered tests and suites.
-        public static func all() -> Test.Plan.Registry {
-            var registry = sections()
+    // MARK: - Legacy: Type Metadata-Based Discovery
 
-            if registry.count == 0 {
-                registry = typeMetadata()
+    /// Discovers tests and suites from type metadata (legacy, Swift < 6.3).
+    ///
+    /// Scans `__swift5_types` for enum types named `__🟡$...` that conform to
+    /// `__TestContentRecordContainer`. Each matching type's
+    /// `__testContentRecord` property provides a test content record tuple.
+    ///
+    /// - Returns: A registry containing all discovered tests and suites.
+    public static func typeMetadata() -> Test.Plan.Registry {
+        var registry = Test.Plan.Registry()
+
+        let types = Loader.types(named: "__🟡$")
+
+        for type in types {
+            // Dynamic type-metadata discovery: `types` are runtime-scanned
+            // from `__swift5_types` with no compile-time known conformer,
+            // so an existential cast is the only way to test conformance.
+            // swiftlint:disable:next no_any_protocol_existential
+            guard let container = type as? any Test.__TestContentRecordContainer.Type else {
+                continue
             }
 
-            return registry
+            unsafe processRecord(container.__testContentRecord, into: &registry)
         }
+
+        return registry
+    }
+
+    // MARK: - Unified Discovery
+
+    /// Discovers all tests using the best available method.
+    ///
+    /// Tries section-based discovery first, then falls back to
+    /// type-metadata discovery if no tests are found (Swift < 6.3).
+    ///
+    /// - Returns: A registry containing all discovered tests and suites.
+    public static func all() -> Test.Plan.Registry {
+        var registry = sections()
+
+        if registry.count == 0 {
+            registry = typeMetadata()
+        }
+
+        return registry
     }
 }

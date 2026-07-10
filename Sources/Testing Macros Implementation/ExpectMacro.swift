@@ -18,7 +18,9 @@ import SwiftSyntaxMacros
 /// #expect(result == 42)
 /// #expect(result == 42, "should be the answer")
 /// ```
-public struct ExpectMacro: ExpressionMacro {
+public struct ExpectMacro: ExpressionMacro {}
+
+extension ExpectMacro {
     public static func expansion(
         of node: some FreestandingMacroExpansionSyntax,
         in context: some MacroExpansionContext
@@ -35,7 +37,9 @@ public struct ExpectMacro: ExpressionMacro {
 /// try #require(isValid)
 /// let value = try #require(optionalValue)
 /// ```
-public struct RequireMacro: ExpressionMacro {
+public struct RequireMacro: ExpressionMacro {}
+
+extension RequireMacro {
     public static func expansion(
         of node: some FreestandingMacroExpansionSyntax,
         in context: some MacroExpansionContext
@@ -77,7 +81,9 @@ private func expandConditionMacro(
 
 private enum ConditionMacroError: Swift.Error, CustomStringConvertible {
     case missingCondition
+}
 
+extension ConditionMacroError {
     var description: String {
         "#expect / #require requires a condition or optional argument"
     }

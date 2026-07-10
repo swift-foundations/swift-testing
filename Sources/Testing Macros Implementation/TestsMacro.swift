@@ -47,7 +47,9 @@ import SwiftSyntaxMacros
 ///     #Tests(snapshots: .init(recording: .all))
 /// }
 /// ```
-public struct TestsMacro: DeclarationMacro {
+public struct TestsMacro: DeclarationMacro {}
+
+extension TestsMacro {
     public static func expansion(
         of node: some FreestandingMacroExpansionSyntax,
         in context: some MacroExpansionContext
