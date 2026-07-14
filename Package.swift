@@ -39,7 +39,7 @@ let package = Package(
         // Dynamic loader (symbol lookup)
         .package(url: "https://github.com/swift-foundations/swift-loader.git", branch: "main"),
         // Dependency injection
-        .package(url: "https://github.com/swift-foundations/swift-dependencies.git", branch: "main", traits: ["Clocks"]),
+        .package(url: "https://github.com/swift-foundations/swift-dependencies.git", branch: "main"),
         // Effects system (for optional Testing Effects target)
         .package(url: "https://github.com/swift-foundations/swift-effects.git", branch: "main"),
         // Witness system (mode context for test/live execution)
