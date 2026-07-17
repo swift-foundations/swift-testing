@@ -4,9 +4,9 @@ import Testing_Test_Support
 
 extension Testing {
     @Suite
-    struct HelpersTest {
+    struct `Helpers Test` {
         @Suite struct Unit {}
-        @Suite struct EdgeCase {}
+        @Suite struct `Edge Case` {}
     }
 }
 

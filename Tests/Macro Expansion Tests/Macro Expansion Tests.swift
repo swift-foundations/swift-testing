@@ -3,7 +3,7 @@ import Testing_Macros_Implementation
 import Testing_Test_Support
 
 @Suite
-struct MacroExpansionTests {
+struct `Macro Expansion Tests` {
     @Suite struct Unit {}
 }
 

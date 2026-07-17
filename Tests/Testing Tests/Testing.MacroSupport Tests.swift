@@ -4,7 +4,7 @@ import Testing_Test_Support
 
 extension Testing {
     @Suite
-    struct MacroSupportTest {
+    struct `Macro Support Test` {
         @Suite struct Unit {}
     }
 }

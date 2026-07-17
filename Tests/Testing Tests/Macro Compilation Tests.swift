@@ -2,7 +2,7 @@ import Testing
 import Testing_Test_Support
 
 @Suite
-struct MacroCompilationTests {
+struct `Macro Compilation Tests` {
     @Suite struct Integration {}
 }
 
