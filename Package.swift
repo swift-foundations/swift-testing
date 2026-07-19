@@ -45,7 +45,7 @@ let package = Package(
         // Witness system (mode context for test/live execution)
         .package(url: "https://github.com/swift-foundations/swift-witnesses.git", branch: "main"),
         // Macro implementation
-        .package(url: "https://github.com/swiftlang/swift-syntax", "602.0.0"..<"603.0.0")
+        .package(url: "https://github.com/swiftlang/swift-syntax.git", "602.0.0"..<"603.0.0")
     ],
     targets: [
 
